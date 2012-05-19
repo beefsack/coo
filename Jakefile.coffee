@@ -19,6 +19,10 @@ buildFiles =
   concatenated: "build/#{config.buildName}-concat.js"
   minified: "build/#{config.buildName}-min.js"
 
+# Used to track the watcher timeout, to avoid build spam on mass source changes.
+exports.watchTimeout = null
+exports.watchTimeoutWaiting = false
+
 # TASKS
 
 desc 'Build the source.'
@@ -119,8 +123,13 @@ task 'watch', ['make'], ->
       console.log "#{f} updated."
     else
       console.log "#{f} removed."
-    jake.Task['make'].reenable true
-    jake.Task['make'].invoke()
+    clearTimeout exports.watchTimeout if exports.watchTimeoutWaiting
+    exports.watchTimeoutWaiting = true
+    exports.watchTimeout = setTimeout ->
+      jake.Task['make'].reenable true
+      jake.Task['make'].invoke()
+      exports.watchTimeoutWaiting = false
+    , 500
 
 # DIRECTORIES
 
