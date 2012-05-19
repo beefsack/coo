@@ -7,29 +7,13 @@ findit = require 'findit'
 coffee = require 'coffee-script'
 mkdirp = require 'mkdirp'
 jasmine = require 'jasmine-node'
+coffeeMug = require './lib/coffee-mug/coffee-mug'
 
 # CONFIG FILE
 
 configFile = 'config.json'
 configFileContents = fs.readFileSync configFile, 'utf8'
 config = JSON.parse configFileContents
-
-# CONSTANTS
-
-buildFiles =
-  concatenated: "build/#{config.buildName}-concat.js"
-  minified: "build/#{config.buildName}-min.js"
-
-# PACKAGE METHODS AND VARIABLES
-
-# Used to track the watcher timeout, to avoid build spam on mass source changes.
-exports.watchTimeout = null
-exports.watchTimeoutWaiting = false
-
-# Gets the .js equivalent of a file.  Converts .js.coffe and .coffee to .js.
-exports.getJsName = (file) ->
-  return file.replace /(\.js)?\.coffee$/, '.js' if file.match /\.coffee$/
-  file
 
 # TASKS
 
@@ -79,7 +63,7 @@ namespace 'compile', ->
     return unless ['coffee', 'js'].indexOf(extension) isnt -1
     # Calculate the target so we can check if copy or compilation is required
     if extension is 'coffee'
-      target = exports.getJsName file.replace(/^src/, 'build/compiled')
+      target = coffeeMug.getJsName file.replace(/^src/, 'build/compiled')
     else
       target = file.replace /^src/, 'build/compiled'
     # Ignore file if the compiled version is newer
@@ -169,12 +153,12 @@ task 'watch', ['make'], ->
     # This is run with a timeout to avoid build spam, such as when moving and
     # deleting a large amount of files.  The timer is reset whenever a request
     # is made inside the timeout period.
-    clearTimeout exports.watchTimeout if exports.watchTimeoutWaiting
-    exports.watchTimeoutWaiting = true
-    exports.watchTimeout = setTimeout ->
+    clearTimeout coffeeMug.watchTimeout if coffeeMug.watchTimeoutWaiting
+    coffeeMug.watchTimeoutWaiting = true
+    coffeeMug.watchTimeout = setTimeout ->
       jake.Task['make'].reenable true
       jake.Task['make'].invoke()
-      exports.watchTimeoutWaiting = false
+      coffeeMug.watchTimeoutWaiting = false
     , 100
 
 task 'test', ->
