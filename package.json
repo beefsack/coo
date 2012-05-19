@@ -1,14 +1,15 @@
 {
-  "name": "gantt",
+  "name": "coffee-mug",
   "version": "0.0.1",
-  "homepage": "https://github.com/beefsack/gantt.js",
+  "homepage": "http://beefsack.github.com/coffee-mug",
   "repository": {
     "type": "git",
-    "url": "git@github.com:beefsack/gantt.js.git"
+    "url": "git@github.com:beefsack/coffee-mug.git"
   },
   "dependencies": {
     "coffee-script": "1.3.x",
     "jake": "0.2.x",
-    "uglify-js": "1.2.x"
+    "uglify-js": "1.2.x",
+    "watch": "0.5.x"
   }
 }
