@@ -19,9 +19,16 @@ buildFiles =
   concatenated: "build/#{config.buildName}-concat.js"
   minified: "build/#{config.buildName}-min.js"
 
+# PACKAGE METHODS AND VARIABLES
+
 # Used to track the watcher timeout, to avoid build spam on mass source changes.
 exports.watchTimeout = null
 exports.watchTimeoutWaiting = false
+
+# Gets the .js equivalent of a file.  Converts .js.coffe and .coffee to .js.
+exports.getJsName = (file) ->
+  return file.replace /(\.js)?\.coffee$/, '.js' if file.match /\.coffee$/
+  file
 
 # TASKS
 
@@ -30,6 +37,7 @@ task 'make', ['compile', 'concat', 'minify']
 
 desc 'Compile from source.'
 task 'compile', ->
+  console.time 'Compile'
   console.log 'Compiling source...'
   # Traverse src tree to find old files
   findit.sync 'src', (file) ->
@@ -39,9 +47,18 @@ task 'compile', ->
   console.log 'Pruning orphaned files...'
   orphanedDirs = []
   findit.sync 'build/compiled', (file) ->
+    # Build some path candidates and check if it exists in the source.
     searchPath = file.replace /^build\/compiled/, 'src'
-    searchPathCoffee = searchPath.replace /\.js$/, '.coffee'
-    return if path.existsSync(searchPath) or path.existsSync(searchPathCoffee)
+    pathCandidates = [
+      searchPath
+      "#{searchPath}.coffee"
+      searchPath.replace(/\.js$/, '.coffee')
+    ]
+    existsInSrc = false
+    existsInSrc = existsInSrc or path.existsSync(p) for p in pathCandidates
+    # We found it in src, so we leave it
+    return if existsInSrc
+    # Check if it is a file or a directory and handle appropriately
     fileStats = fs.statSync file
     if fileStats.isFile()
       fs.unlinkSync file
@@ -49,7 +66,7 @@ task 'compile', ->
       # Collect directories to remove after files
       orphanedDirs.push file
   fs.rmdir dir for dir in orphanedDirs
-  console.log 'Compiled source.'
+  console.timeEnd 'Compile'
 
 namespace 'compile', ->
   desc 'Compile a file from source.'
@@ -61,7 +78,7 @@ namespace 'compile', ->
     return unless ['coffee', 'js'].indexOf(extension) isnt -1
     # Calculate the target so we can check if copy or compilation is required
     if extension is 'coffee'
-      target = file.replace(/^src/, 'build/compiled').replace(/\.coffee$/, '.js')
+      target = exports.getJsName file.replace(/^src/, 'build/compiled')
     else
       target = file.replace /^src/, 'build/compiled'
     # Ignore file if the compiled version is newer
@@ -86,15 +103,16 @@ namespace 'compile', ->
 
 desc 'Build concatenated source.'
 task 'concat', ->
-  jake.Task['compile'].invoke()
+  console.time 'Concatenate'
   console.log 'Concatenating compiled source...'
   jake.exec ["find build/compiled/ -name *.js | xargs cat > #{buildFiles.concatenated}"], ->
-    console.log 'Successfully concatenated compiled source.'
+    console.timeEnd 'Concatenate'
     complete()
 , {async: true}
 
 desc 'Build minified source.'
 task 'minify', ->
+  console.time 'Minify'
   console.log 'Minifying source...'
   concatenated = fs.readFileSync buildFiles.concatenated, 'utf8'
   jsp = uglifyJs.parser
@@ -104,12 +122,12 @@ task 'minify', ->
   ast = pro.ast_squeeze ast
   minified = pro.gen_code ast
   fs.writeFileSync buildFiles.minified, minified
-  console.log 'Successfully minified source.'
+  console.timeEnd 'Minify'
 
 desc 'Clean build directory.'
 task 'clean', ['build/compiled'], ->
   console.log 'Cleaning build directory...'
-  jake.exec ['rm -rfv build/compiled/*'], ->
+  jake.exec ['rm -rfv build'], ->
     console.log 'Successfully cleaned build directory.'
     complete()
 , {async: true}
@@ -123,6 +141,9 @@ task 'watch', ['make'], ->
       console.log "#{f} updated."
     else
       console.log "#{f} removed."
+    # This is run with a timeout to avoid build spam, such as when moving and
+    # deleting a large amount of files.  The timer is reset whenever a request
+    # is made inside the timeout period.
     clearTimeout exports.watchTimeout if exports.watchTimeoutWaiting
     exports.watchTimeoutWaiting = true
     exports.watchTimeout = setTimeout ->
