@@ -6,6 +6,7 @@ uglifyJs = require 'uglify-js'
 findit = require 'findit'
 coffee = require 'coffee-script'
 mkdirp = require 'mkdirp'
+jasmine = require 'jasmine-node'
 
 # CONFIG FILE
 
@@ -102,26 +103,50 @@ namespace 'compile', ->
     console.log "Removing #{file}..."
 
 desc 'Build concatenated source.'
-task 'concat', ->
+task 'concat', (buildPackage) ->
+  unless buildPackage?
+    # No buildPackage was specified, so loop over all packages in the config
+    for name, c of config.buildPackages
+      jake.Task['concat'].reenable true
+      jake.Task['concat'].invoke name
+    return
   console.time 'Concatenate'
-  console.log 'Concatenating compiled source...'
-  jake.exec ["find build/compiled/ -name *.js | xargs cat > #{buildFiles.concatenated}"], ->
-    console.timeEnd 'Concatenate'
-    complete()
-, {async: true}
+  console.log "Concatenating compiled source for #{buildPackage}..."
+  loadFiles = []
+  # First build a list of files to load, ignoring duplicates
+  for source in config.buildPackages[buildPackage].sources
+    sourcePath = path.normalize "build/compiled/#{source}"
+    sourcePathStats = fs.statSync sourcePath
+    if sourcePathStats.isFile()
+      loadFiles.push sourcePath if loadFiles.indexOf(sourcePath) is -1
+    else if sourcePathStats.isDirectory()
+      findit.sync sourcePath, (file) ->
+        loadFiles.push file if file.match(/\.js$/) and loadFiles.indexOf(file) is -1
+  # Iterate over files to load and concatenate them
+  concatData = ''
+  for file in loadFiles
+    concatData += fs.readFileSync file, 'utf8'
+  fs.writeFileSync "build/#{buildPackage}-concat.js", concatData
+  console.timeEnd 'Concatenate'
 
 desc 'Build minified source.'
-task 'minify', ->
+task 'minify', (buildPackage) ->
+  unless buildPackage?
+    # No buildPackage was specified, so loop over all packages in the config
+    for name, c of config.buildPackages
+      jake.Task['minify'].reenable true
+      jake.Task['minify'].invoke name
+    return
   console.time 'Minify'
-  console.log 'Minifying source...'
-  concatenated = fs.readFileSync buildFiles.concatenated, 'utf8'
+  console.log "Minifying source for #{buildPackage}..."
+  concatenated = fs.readFileSync "build/#{buildPackage}-concat.js" , 'utf8'
   jsp = uglifyJs.parser
   pro = uglifyJs.uglify
   ast = jsp.parse concatenated
   ast = pro.ast_mangle ast
   ast = pro.ast_squeeze ast
   minified = pro.gen_code ast
-  fs.writeFileSync buildFiles.minified, minified
+  fs.writeFileSync "build/#{buildPackage}-min.js", minified
   console.timeEnd 'Minify'
 
 desc 'Clean build directory.'
@@ -151,6 +176,12 @@ task 'watch', ['make'], ->
       jake.Task['make'].invoke()
       exports.watchTimeoutWaiting = false
     , 100
+
+task 'test', ->
+  onComplete = (runner, log) ->
+    util.print '\n'
+    exitCode = if runner.results().failedCount is 0 then 0 else 1
+  jasmine.executeSpecsInFolder 'spec', onComplete, false, true
 
 # DIRECTORIES
 

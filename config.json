@@ -1,3 +1,9 @@
 {
-  "buildName": "build"
+  "buildPackages": {
+    "package": {
+      "sources": [
+        "."
+      ]
+    }
+  }
 }
