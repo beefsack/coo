@@ -161,11 +161,16 @@ task 'watch', ['make'], ->
       coffeeMug.watchTimeoutWaiting = false
     , 100
 
+desc 'Run the tests in the spec directory.'
 task 'test', ->
   onComplete = (runner, log) ->
-    util.print '\n'
-    exitCode = if runner.results().failedCount is 0 then 0 else 1
   jasmine.executeSpecsInFolder 'spec', onComplete, false, true
+
+namespace 'test', ->
+  desc 'Run the tests for coffee-mug.'
+  task 'coffeeMug', ->
+    onComplete = ->
+    jasmine.executeSpecsInFolder 'lib/coffee-mug/spec', onComplete, false, true
 
 # DIRECTORIES
 
