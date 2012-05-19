@@ -164,13 +164,12 @@ task 'watch', ['make'], ->
 desc 'Run the tests in the spec directory.'
 task 'test', ->
   onComplete = (runner, log) ->
-  jasmine.executeSpecsInFolder 'spec', onComplete, false, true
+  jasmine.executeSpecsInFolder 'spec', false, false, true
 
 namespace 'test', ->
   desc 'Run the tests for coffee-mug.'
   task 'coffeeMug', ->
-    onComplete = ->
-    jasmine.executeSpecsInFolder 'lib/coffee-mug/spec', onComplete, false, true
+    jasmine.executeSpecsInFolder 'lib/coffee-mug/spec', false, false, true
 
 # DIRECTORIES
 
