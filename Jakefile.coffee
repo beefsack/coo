@@ -1,5 +1,11 @@
 fs = require 'fs'
+path = require 'path'
+util = require 'util'
 watch = require 'watch'
+uglifyJs = require 'uglify-js'
+findit = require 'findit'
+coffee = require 'coffee-script'
+mkdirp = require 'mkdirp'
 
 # CONFIG FILE
 
@@ -19,12 +25,46 @@ desc 'Build the source.'
 task 'make', ['compile', 'concat', 'minify']
 
 desc 'Compile from source.'
-task 'compile', ['clean', 'build/compiled'], ->
+task 'compile', ['clean', ], ->
   console.log 'Compiling source...'
-  jake.exec ['coffee -o build/compiled/ -c src/'], ->
-    console.log 'Successfully compiled source.'
-    complete()
-, {async: true}
+  # Traverse src tree to find old files
+  findit.find 'src', (file) ->
+    jake.Task['compile:file'].reenable true
+    jake.Task['compile:file'].invoke file
+  # Traverse compile trees to prune orphaned files
+
+namespace 'compile', ->
+  desc 'Compile a file from source.'
+  task 'file', ['build/compiled'], (file) ->
+    # Only handle coffee or js files
+    extensionCheck = file.match(/\.([^\.]+)$/)
+    return unless extensionCheck
+    extension = extensionCheck[1]
+    return unless ['coffee', 'js'].indexOf(extension) isnt -1
+    # Calculate the target so we can check if copy or compilation is required
+    if extension is 'coffee'
+      target = file.replace(/^src/, 'build/compiled').replace(/\.coffee$/, '.js')
+    else
+      target = file.replace(/^src/, 'build/compiled')
+    # Generate contents if required
+    if extension is 'coffee'
+      console.log "Compiling #{file}..."
+      source = fs.readFileSync file, 'utf8'
+      contents = coffee.compile source
+    # Write the contents, or if no contents we directly copy the file
+    mkdirp.sync path.dirname(target)
+    if contents?
+      console.log "Copying result to #{target}..."
+      fs.writeFileSync target, contents
+    else
+      console.log "Copying #{file} to #{target}..."
+      util.pump fs.createReadStream(file), fs.createWriteStream(target)
+
+    # Write the file
+
+  desc 'Remove a file from source'
+  task 'remove', (file) ->
+    console.log "Removing #{file}..."
 
 desc 'Build concatenated source.'
 task 'concat', ->
@@ -37,10 +77,10 @@ task 'concat', ->
 
 desc 'Build minified source.'
 task 'minify', ->
-  jsp = require("uglify-js").parser;
-  pro = require("uglify-js").uglify;
   console.log 'Minifying source...'
   concatenated = fs.readFileSync buildFiles.concatenated, 'utf8'
+  jsp = uglifyJs.parser
+  pro = uglifyJs.uglify
   ast = jsp.parse concatenated
   ast = pro.ast_mangle ast
   ast = pro.ast_squeeze ast
@@ -58,16 +98,15 @@ task 'clean', ['build/compiled'], ->
 
 desc 'Watch the source directory and make whenever source changes.'
 task 'watch', ['make'], ->
+  console.log 'Watching src directory for changes...'
   watch.watchTree 'src', (f, curr, prev) ->
-    return unless f.match? and f.match /\.coffee$/
-    unless prev?
-      console.log "#{f} created, rebuilding..."
-    else if curr.nlink is 0
-      console.log "#{f} removed, rebuilding..."
+    return unless typeof f is 'string'
+    unless prev? and curr.nlink is 0
+      console.log "#{f} updated."
     else
-      console.log "#{f} changed, rebuilding..."
+      console.log "#{f} removed."
     jake.Task['make'].reenable true
-    jake.Task['make'].invoke()
+    jake.Task['make'].invoke
 
 # DIRECTORIES
 
