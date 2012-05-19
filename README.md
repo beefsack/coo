@@ -1,4 +1,5 @@
-== coffee-mug - CoffeeScript and JavaScript project framework
+coffee-mug - CoffeeScript and JavaScript project framework
+==========================================================
 
 coffee-mug is a CoffeeScript and JavaScript project framework, that automates
 testing and building of your project.  coffee-mug can watch for changes in your
