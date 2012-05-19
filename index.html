@@ -21,6 +21,20 @@
         margin-left: auto;
         margin-right: auto;
       }
+      .masthead {
+        margin-bottom: 60px;
+      }
+      .masthead h1 {
+        font-size: 64px;
+        margin-top: 100px;
+        margin-left: 100px;
+      }
+      .masthead h2 {
+        color: #999;
+        font-size: 24px;
+        margin-top: 20px;
+        margin-left: 100px;
+      }
     </style>
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
 
@@ -32,7 +46,7 @@
   </head>
 
   <body>
-    <a href="https://github.com/beefsack/coffee-mug"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 1100;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+    <a href="https://github.com/beefsack/coffee-mug"><img style="position: fixed; top: 0; right: 0; border: 0; z-index: 1100;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
 
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
@@ -48,12 +62,14 @@
     </div>
 
     <div class="container">
-      <div class="row">
+      <div class="row masthead">
         <div class="span8">
-          <div class="hero-unit">
+          <h1 class="huge">coffee-mug</h1>
+          <h2>JavaScript and CoffeeScript project framework</h2>
+          <!-- <div class="hero-unit">
             <h1>Focus on code</h1>
             <p>Automatic compilation, concatenation and minification of your JavaScript and <a href="http://coffeescript.org/">CoffeeScript</a>  projects whenever your files change.  Built on <a href="http://nodejs.org/">node.js</a>, coffee-mug includes multiple configurable build packages with custom dependencies, and integrated testing via <a href="http://pivotal.github.com/jasmine/">Jasmine BDD testing framework</a>.</p>
-          </div>
+          </div> -->
         </div>
         <div class="span4">
           <img src="img/coffee-mug-logo.png" class="coffee-mug-logo" />
