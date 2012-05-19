@@ -25,13 +25,27 @@ desc 'Build the source.'
 task 'make', ['compile', 'concat', 'minify']
 
 desc 'Compile from source.'
-task 'compile', ['clean', ], ->
+task 'compile', ->
   console.log 'Compiling source...'
   # Traverse src tree to find old files
-  findit.find 'src', (file) ->
+  findit.sync 'src', (file) ->
     jake.Task['compile:file'].reenable true
     jake.Task['compile:file'].invoke file
   # Traverse compile trees to prune orphaned files
+  console.log 'Pruning orphaned files...'
+  orphanedDirs = []
+  findit.sync 'build/compiled', (file) ->
+    searchPath = file.replace /^build\/compiled/, 'src'
+    searchPathCoffee = searchPath.replace /\.js$/, '.coffee'
+    return if path.existsSync(searchPath) or path.existsSync(searchPathCoffee)
+    fileStats = fs.statSync file
+    if fileStats.isFile()
+      fs.unlinkSync file
+    else if fileStats.isDirectory()
+      # Collect directories to remove after files
+      orphanedDirs.push file
+  fs.rmdir dir for dir in orphanedDirs
+  console.log 'Compiled source.'
 
 namespace 'compile', ->
   desc 'Compile a file from source.'
@@ -45,7 +59,9 @@ namespace 'compile', ->
     if extension is 'coffee'
       target = file.replace(/^src/, 'build/compiled').replace(/\.coffee$/, '.js')
     else
-      target = file.replace(/^src/, 'build/compiled')
+      target = file.replace /^src/, 'build/compiled'
+    # Ignore file if the compiled version is newer
+    return if path.existsSync(target) and fs.statSync(target).mtime >= fs.statSync(file).mtime
     # Generate contents if required
     if extension is 'coffee'
       console.log "Compiling #{file}..."
@@ -59,8 +75,6 @@ namespace 'compile', ->
     else
       console.log "Copying #{file} to #{target}..."
       util.pump fs.createReadStream(file), fs.createWriteStream(target)
-
-    # Write the file
 
   desc 'Remove a file from source'
   task 'remove', (file) ->
@@ -98,7 +112,7 @@ task 'clean', ['build/compiled'], ->
 
 desc 'Watch the source directory and make whenever source changes.'
 task 'watch', ['make'], ->
-  console.log 'Watching src directory for changes...'
+  console.log 'Watching for changes...'
   watch.watchTree 'src', (f, curr, prev) ->
     return unless typeof f is 'string'
     unless prev? and curr.nlink is 0
@@ -106,7 +120,7 @@ task 'watch', ['make'], ->
     else
       console.log "#{f} removed."
     jake.Task['make'].reenable true
-    jake.Task['make'].invoke
+    jake.Task['make'].invoke()
 
 # DIRECTORIES
 
