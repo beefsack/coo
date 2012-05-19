@@ -129,7 +129,7 @@ task 'watch', ['make'], ->
       jake.Task['make'].reenable true
       jake.Task['make'].invoke()
       exports.watchTimeoutWaiting = false
-    , 500
+    , 100
 
 # DIRECTORIES
 
