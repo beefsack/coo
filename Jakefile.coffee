@@ -3,7 +3,7 @@ path = require 'path'
 util = require 'util'
 watch = require 'watch'
 uglifyJs = require 'uglify-js'
-findit = require 'findit'
+walk = require 'walkdir'
 coffee = require 'coffee-script'
 mkdirp = require 'mkdirp'
 jasmine = require 'jasmine-node'
@@ -25,15 +25,17 @@ task 'compile', ->
   console.time 'Compile'
   console.log 'Compiling source...'
   # Traverse src tree to find old files
-  findit.sync 'src', (file) ->
+  walk.sync 'src', (file) ->
+    file = path.relative __dirname, file
     jake.Task['compile:file'].reenable true
     jake.Task['compile:file'].invoke file
   # Traverse compile trees to prune orphaned files
   console.log 'Pruning orphaned files...'
   orphanedDirs = []
-  findit.sync 'build/compiled', (file) ->
+  walk.sync 'build/compiled', (file) ->
+    file = path.relative __dirname, file
     # Build some path candidates and check if it exists in the source.
-    searchPath = file.replace /^build\/compiled/, 'src'
+    searchPath = file.replace /^build(\/|\\)compiled/, 'src'
     pathCandidates = [
       searchPath
       "#{searchPath}.coffee"
@@ -104,7 +106,8 @@ task 'concat', (buildPackage) ->
     if sourcePathStats.isFile()
       loadFiles.push sourcePath if loadFiles.indexOf(sourcePath) is -1
     else if sourcePathStats.isDirectory()
-      findit.sync sourcePath, (file) ->
+      walk.sync sourcePath, (file) ->
+        file = path.relative __dirname, file
         loadFiles.push file if file.match(/\.js$/) and loadFiles.indexOf(file) is -1
   # Iterate over files to load and concatenate them
   concatData = ''

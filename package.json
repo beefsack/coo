@@ -11,7 +11,7 @@
     "jake": "0.2.x",
     "uglify-js": "1.2.x",
     "watch": "0.5.x",
-    "findit": "0.1.x",
+    "walkdir": "0.0.x",
     "mkdirp": "0.3.x",
     "jasmine-node": "1.0.x"
   }
