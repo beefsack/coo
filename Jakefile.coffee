@@ -1,7 +1,7 @@
 fs = require 'fs'
 path = require 'path'
 util = require 'util'
-watch = require 'watch'
+watchTree = require 'fl-watch-tree'
 uglifyJs = require 'uglify-js'
 walk = require 'walkdir'
 coffee = require 'coffee-script'
@@ -147,22 +147,15 @@ task 'clean', ['build/compiled'], ->
 desc 'Watch the source directory and make whenever source changes.'
 task 'watch', ['make'], ->
   console.log 'Watching for changes...'
-  watch.watchTree 'src', (f, curr, prev) ->
-    return unless typeof f is 'string'
-    unless prev? and curr.nlink is 0
-      console.log "#{f} updated."
-    else
-      console.log "#{f} removed."
-    # This is run with a timeout to avoid build spam, such as when moving and
-    # deleting a large amount of files.  The timer is reset whenever a request
-    # is made inside the timeout period.
-    clearTimeout coffeeMug.watchTimeout if coffeeMug.watchTimeoutWaiting
-    coffeeMug.watchTimeoutWaiting = true
-    coffeeMug.watchTimeout = setTimeout ->
-      jake.Task['make'].reenable true
-      jake.Task['make'].invoke()
-      coffeeMug.watchTimeoutWaiting = false
-    , 100
+  watcher = watchTree.watchTree 'src',
+    'sample-rate': 500
+    match: /\.(coffee|js)$/
+  cb = ->
+    jake.Task['make'].reenable true
+    jake.Task['make'].invoke()
+  watcher.on 'fileCreated', cb
+  watcher.on 'fileModified', cb
+  watcher.on 'fileDeleted', cb
 
 desc 'Run the tests in the spec directory.'
 task 'test', ->
