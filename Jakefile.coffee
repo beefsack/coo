@@ -1,13 +1,13 @@
 fs = require 'fs'
 path = require 'path'
 util = require 'util'
-watchTree = require 'fl-watch-tree'
 uglifyJs = require 'uglify-js'
 walk = require 'walkdir'
 coffee = require 'coffee-script'
 mkdirp = require 'mkdirp'
 jasmine = require 'jasmine-node'
 coffeeMug = require './lib/coffee-mug/coffee-mug'
+watchman = require 'watchman'
 
 # CONFIG FILE
 
@@ -147,15 +147,13 @@ task 'clean', ['build/compiled'], ->
 desc 'Watch the source directory and make whenever source changes.'
 task 'watch', ['make'], ->
   console.log 'Watching for changes...'
-  watcher = watchTree.watchTree 'src',
-    'sample-rate': 500
-    match: /\.(coffee|js)$/
+  watcher = watchman.watch 'src'
   cb = ->
     jake.Task['make'].reenable true
     jake.Task['make'].invoke()
-  watcher.on 'fileCreated', cb
-  watcher.on 'fileModified', cb
-  watcher.on 'fileDeleted', cb
+  watcher.on 'create', cb
+  watcher.on 'change', cb
+  watcher.on 'delete', cb
 
 desc 'Run the tests in the spec directory.'
 task 'test', ->
