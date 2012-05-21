@@ -1,7 +1,7 @@
 {
   "name": "coffee-mug",
   "version": "0.0.1",
-  "homepage": "http://beefsack.github.com/coffee-mug",
+  "homepage": "http://coffee-mug.org",
   "repository": {
     "type": "git",
     "url": "git@github.com:beefsack/coffee-mug.git"
@@ -13,6 +13,13 @@
     "walkdir": "0.0.x",
     "mkdirp": "0.3.x",
     "jasmine-node": "1.0.x",
-    "watchman": "git://github.com/beefsack/node-watchman.git"
-  }
+    "hound": "1.0.x"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "author": "Michael Alexander <mail@michaelalexander.com.au> (http://michaelalexander.com.au)",
+  "description": "JavaScript and CoffeeScript project framework"
 }

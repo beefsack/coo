@@ -7,7 +7,7 @@ coffee = require 'coffee-script'
 mkdirp = require 'mkdirp'
 jasmine = require 'jasmine-node'
 coffeeMug = require './lib/coffee-mug/coffee-mug'
-watchman = require 'watchman'
+hound = require 'hound'
 
 # CONFIG FILE
 
@@ -147,7 +147,7 @@ task 'clean', ['build/compiled'], ->
 desc 'Watch the source directory and make whenever source changes.'
 task 'watch', ['make'], ->
   console.log 'Watching for changes...'
-  watcher = watchman.watch 'src'
+  watcher = hound.watch 'src'
   cb = ->
     jake.Task['make'].reenable true
     jake.Task['make'].invoke()
