@@ -1,12 +1,16 @@
 fs = require 'fs'
 path = require 'path'
-CoffeeScript = require('./compiler/coffee-script').CoffeeScript
-Haml = require('./compiler/haml').Haml
 XRegExp = require('xregexp').XRegExp
 mkdirp = require 'mkdirp'
 walkdir = require 'walkdir'
 _ = require 'underscore'
 util = require 'util'
+# Compilers
+CoffeeScript = require('./compiler/coffee-script').CoffeeScript
+Haml = require('./compiler/haml').Haml
+Jade = require('./compiler/jade').Jade
+Less = require('./compiler/less').Less
+Stylus = require('./compiler/stylus').Stylus
 
 exports.Builder = class Builder
   sourcePath: null
@@ -27,21 +31,56 @@ exports.Builder = class Builder
       path: '**'
       targetFile: (file) -> file
     }
+    # JS compilers
     {
-      # CoffeeScript files
+      # CoffeeScript
       path: '**.coffee'
       compiler: new CoffeeScript
       compile: true
       targetFile: (file) ->
         if @compile then file.replace /(\.js)?\.coffee/, '.js' else file
     }
+    # HTML compilers
     {
-      # Haml files
+      # Haml
       path: '**.haml'
       compiler: new Haml
       compile: true
       targetFile: (file) ->
-        if @compile then file.replace /(\.html)?\.haml/, '.haml' else file
+        if @compile then file.replace /(\.html)?\.haml/, '.html' else file
+    }
+    {
+      # Jade
+      path: '**.jade'
+      compiler: new Jade
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.html)?\.jade/, '.html' else file
+    }
+    # CSS compilers
+    {
+      # LESS
+      path: '**.less'
+      compiler: new Less
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.css)?\.less/, '.css' else file      
+    }
+    # {
+    #   # SCSS and SASS
+    #   path: [ '**.sass', '**.scss' ]
+    #   compiler: new Scss
+    #   compile: true
+    #   targetFile: (file) ->
+    #     if @compile then file.replace /(\.css)?\.s[ac]ss/, '.css' else file      
+    # }
+    {
+      # Stylus
+      path: '**.styl'
+      compiler: new Stylus
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.css)?\.styl/, '.css' else file      
     }
   ]
   postPaths: []
