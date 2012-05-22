@@ -120,14 +120,44 @@ exports.Builder = class Builder
             console.log "Copying #{f}..."
             util.pump fs.createReadStream(sourceFile), fs.createWriteStream(targetFile)
     # Prune orphaned files
+    buildFileNames = []
+    for bf in _.keys @files
+      buildFileNames.push path.join(@compilePath, version, bf)
     walkdir.sync path.join(@compilePath, version), (f, stat) ->
       return if stat.isDirectory()
-      if targets.indexOf(f) is -1
+      if targets.indexOf(f) is -1 and buildFileNames.indexOf(f) is -1
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync f
   buildFiles: (version) ->
     version = @defaultVersion unless version?
     throw "#{version} is not a valid version name" unless @versions[version]?
+    builtFiles = []
+    compiledFiles = []
+    for c, f of @generateCompileConfigTree() when not f.ignore
+      compiledFiles.push f.targetFile(c)
+    for bf, bfConf of @files
+      # Check if we need update, searching sources one by one to get correct
+      # dependency order
+      bfPath = path.join @compilePath, version, bf
+      sources = [bfConf.source] unless _.isArray bfConf.source
+      matchedFiles = []
+      requiresBuild = false
+      for s in sources
+        for cf in compiledFiles when (matchedFiles.indexOf cf is -1) and
+        @matchPath cf, s
+          cfPath = path.join @compilePath, version, cf
+          throw "Cannot find compiled file #{cf}" unless path.existsSync cfPath
+          matchedFiles.push cfPath
+          if not requiresBuild and (not path.existsSync(bfPath) or
+          fs.statSync(cfPath).mtime > fs.statSync(bfPath).mtime)
+            requiresBuild = true
+      if requiresBuild
+        console.log "Building #{bf}..."
+        mkdirp.sync path.dirname(bfPath)
+        bfFile = fs.openSync bfPath, 'w'
+        for mf in matchedFiles
+          fs.writeSync(bfFile, fs.readFileSync(mf, 'utf8'), null)
+      compiledFiles.push bf
   postProcess: (version) ->
     version = @defaultVersion unless version?
     throw "#{version} is not a valid version name" unless @versions[version]?
