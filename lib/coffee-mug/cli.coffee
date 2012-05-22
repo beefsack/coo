@@ -1,14 +1,16 @@
+# Command classes
+Build = require('./cli/build').Build
+Watch = require('./cli/watch').Watch
+
 exports.Cli = class Cli
   coffeeMug: null
   commands:
-    build:
-      file: './cli/build'
-      className: 'Build'    
+    build: new Build
+    watch: new Watch
   factory: (command) ->
-    cliInfo = @commands[command]
-    unless cliInfo?
+    unless @commands[command]?
       throw 'Invalid command, use --help to see a list of commands'
-    new ((require cliInfo.file)[cliInfo.className])
+    @commands[command]
   initCommander: (command) ->
     cmdr = require 'commander'
     # Add commands
