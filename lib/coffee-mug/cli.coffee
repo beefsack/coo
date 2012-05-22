@@ -1,12 +1,14 @@
 # Command classes
 Build = require('./cli/build').Build
 Watch = require('./cli/watch').Watch
+Server = require('./cli/server').Server
 
 exports.Cli = class Cli
   coffeeMug: null
   commands:
     build: new Build
     watch: new Watch
+    server: new Server
   factory: (command) ->
     unless @commands[command]?
       throw 'Invalid command, use --help to see a list of commands'

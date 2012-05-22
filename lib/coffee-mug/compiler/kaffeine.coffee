@@ -1,4 +1,6 @@
 kaffeine = require 'kaffeine'
 
 exports.Kaffeine = class Kaffeine
-  compile: (source) -> kaffeine.compile source
+  compile: (source) ->
+    k = new kaffeine
+    k.compile source

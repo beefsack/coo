@@ -2,6 +2,7 @@ fs = require 'fs'
 path = require 'path'
 Builder = require('./builder').Builder
 hound = require 'hound'
+nodeStatic = require 'node-static'
 
 # The CoffeeMug object contains the base functionality of coffee-mug
 exports.CoffeeMug = class CoffeeMug
@@ -34,3 +35,19 @@ exports.CoffeeMug = class CoffeeMug
     watcher.on 'create', cb
     watcher.on 'change', cb
     watcher.on 'delete', cb
+  server: (version) ->
+    # Start a server, then watch
+    version = @builder().defaultVersion unless version?
+    file = new nodeStatic.Server path.join(@builder().compilePath, version),
+      cache: false
+    require('http').createServer( (request, response) ->
+      request.addListener 'end', ->
+        file.serve request, response, (err, res) ->
+          if err?
+            console.error "Error serving #{request.url} - #{err.message}"
+            response.writeHead err.status, err.headers
+            response.end()
+          else
+            console.log "#{request.url} - #{res.message}").listen 8080
+    console.log "Server is listening on http://127.0.0.1:8080"
+    @watch version

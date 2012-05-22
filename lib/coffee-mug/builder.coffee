@@ -17,6 +17,14 @@ Less = require('./compiler/less').Less
 Stylus = require('./compiler/stylus').Stylus
 Markdown = require('./compiler/markdown').Markdown
 
+generateCompilerConfig = (compiler, extension, target) ->
+  path: "**.#{extension}"
+  compiler: compiler
+  compile: true
+  targetFile: (file) ->
+    repRegex = new RegExp "(.#{target})?\\.#{extension}$"
+    if @compile then file.replace repRegex, ".#{target}" else file            
+
 exports.Builder = class Builder
   sourcePath: null
   compilePath: null
@@ -37,88 +45,18 @@ exports.Builder = class Builder
       targetFile: (file) -> file
     }
     # JS compilers
-    {
-      # CoffeeScript
-      path: '**.coffee'
-      compiler: new CoffeeScript
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.js)?\.coffee/, '.js' else file
-    }
-    {
-      # IcedCoffeeScript
-      path: '**.iced'
-      compiler: new IcedCoffeeScript
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.js)?\.iced/, '.js' else file
-    }
-    {
-      # Coco
-      path: '**.co'
-      compiler: new Coco
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.js)?\.co/, '.js' else file
-    }
-    {
-      # Kaffeine
-      path: '**.k'
-      compiler: new Coco
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.js)?\.k/, '.js' else file
-    }
-    {
-      # Move
-      path: '**.mv'
-      compiler: new Move
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.js)?\.mv/, '.js' else file
-    }
+    generateCompilerConfig new CoffeeScript, 'coffee', 'js'
+    generateCompilerConfig new IcedCoffeeScript, 'iced', 'js'
+    generateCompilerConfig new Coco, 'co', 'js'
+    generateCompilerConfig new Kaffeine, 'k', 'js'
+    generateCompilerConfig new Move, 'mv', 'js'
     # HTML compilers
-    {
-      # Haml
-      path: '**.haml'
-      compiler: new Haml
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.html)?\.haml/, '.html' else file
-    }
-    {
-      # Jade
-      path: '**.jade'
-      compiler: new Jade
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.html)?\.jade/, '.html' else file
-    }
-    {
-      # Markdown
-      path: '**.md'
-      compiler: new Markdown
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.html)?\.md/, '.html' else file
-    }
+    generateCompilerConfig new Haml, 'haml', 'html'
+    generateCompilerConfig new Jade, 'jade', 'html'
+    generateCompilerConfig new Markdown, 'md', 'html'
     # CSS compilers
-    {
-      # LESS
-      path: '**.less'
-      compiler: new Less
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.css)?\.less/, '.css' else file      
-    }
-    {
-      # Stylus
-      path: '**.styl'
-      compiler: new Stylus
-      compile: true
-      targetFile: (file) ->
-        if @compile then file.replace /(\.css)?\.styl/, '.css' else file      
-    }
+    generateCompilerConfig new Less, 'less', 'css'
+    generateCompilerConfig new Stylus, 'styl', 'css'
   ]
   postPaths: []
   # Load in a config file and run the config's 'config' function for this
@@ -176,13 +114,13 @@ exports.Builder = class Builder
       unless conf.ignore
         if not path.existsSync(targetFile) or fs.statSync(targetFile).mtime <
         fs.statSync(sourceFile).mtime
+          mkdirp.sync path.dirname(targetFile)
           if conf.compile
             console.log "Compiling #{f}..."
             source = fs.readFileSync sourceFile, 'utf8'
             fs.writeFileSync targetFile, conf.compiler.compile(source)
           else
             console.log "Copying #{f}..."
-            mkdirp.sync path.dirname(targetFile)
             util.pump fs.createReadStream(sourceFile), fs.createWriteStream(targetFile)
     # Prune orphaned files
     walkdir.sync path.join(@compilePath, version), (f, stat) ->
