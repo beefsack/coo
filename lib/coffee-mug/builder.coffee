@@ -9,6 +9,7 @@ util = require 'util'
 Coco = require('./compiler/coco').Coco
 CoffeeScript = require('./compiler/coffee-script').CoffeeScript
 IcedCoffeeScript = require('./compiler/iced-coffee-script').IcedCoffeeScript
+Kaffeine = require('./compiler/kaffeine').Kaffeine
 Haml = require('./compiler/haml').Haml
 Jade = require('./compiler/jade').Jade
 Less = require('./compiler/less').Less
@@ -58,6 +59,14 @@ exports.Builder = class Builder
       compile: true
       targetFile: (file) ->
         if @compile then file.replace /(\.js)?\.co/, '.js' else file
+    }
+    {
+      # Kaffeine
+      path: '**.k'
+      compiler: new Coco
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.js)?\.k/, '.js' else file
     }
     # HTML compilers
     {

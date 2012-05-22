@@ -23,7 +23,8 @@
     "stylus": "0.27.x",
     "coco": "0.7.x",
     "marked": "0.2.x",
-    "iced-coffee-script": "1.3.x"
+    "iced-coffee-script": "1.3.x",
+    "kaffeine": "0.1.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},
