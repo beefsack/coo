@@ -96,15 +96,12 @@ exports.Builder = class Builder
   build: (version) ->
     version = @defaultVersion unless version?
     throw "#{version} is not a valid version name" unless @versions[version]?
-    @compile() unless @versions[version].compile is false
-    @buildFiles() unless @versions[version].buildFiles is false
-    unless @versions[version].postProcess is false
-      @postProcess()
-    console.log 'build'
+    @compile version unless @versions[version].compile is false
+    @buildFiles version unless @versions[version].buildFiles is false
+    @postProcess version unless @versions[version].postProcess is false
   compile: (version) ->
     version = @defaultVersion unless version?
     throw "#{version} is not a valid version name" unless @versions[version]?
-    console.log 'Compiling...'
     # Create new files when required
     targets = []
     for f, conf of @generateCompileConfigTree(version)
@@ -128,15 +125,12 @@ exports.Builder = class Builder
       if targets.indexOf(f) is -1
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync f
-
   buildFiles: (version) ->
     version = @defaultVersion unless version?
     throw "#{version} is not a valid version name" unless @versions[version]?
-    console.log 'build files'
   postProcess: (version) ->
     version = @defaultVersion unless version?
     throw "#{version} is not a valid version name" unless @versions[version]?
-    console.log 'post process'
   generateCompileConfigTree: (version) ->
     @compileConfigTree[version] = {} unless @compileConfigTree[version]
     # Prune missing items from the tree

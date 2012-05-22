@@ -25,7 +25,7 @@ exports.CoffeeMug = class CoffeeMug
     return file.replace /(\.js)?\.coffee$/, '.js' if file.match /\.coffee$/
     file
   watch: (version) ->
-    console.log "Watching for changes"
+    @build version
     watcher = hound.watch @builder().sourcePath
     cb = =>
       clearTimeout @watchBuffer if @watchBuffer?
