@@ -8,6 +8,7 @@ util = require 'util'
 # Compilers
 Coco = require('./compiler/coco').Coco
 CoffeeScript = require('./compiler/coffee-script').CoffeeScript
+IcedCoffeeScript = require('./compiler/iced-coffee-script').IcedCoffeeScript
 Haml = require('./compiler/haml').Haml
 Jade = require('./compiler/jade').Jade
 Less = require('./compiler/less').Less
@@ -41,6 +42,14 @@ exports.Builder = class Builder
       compile: true
       targetFile: (file) ->
         if @compile then file.replace /(\.js)?\.coffee/, '.js' else file
+    }
+    {
+      # IcedCoffeeScript
+      path: '**.iced'
+      compiler: new IcedCoffeeScript
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.js)?\.iced/, '.js' else file
     }
     {
       # Coco
@@ -84,14 +93,6 @@ exports.Builder = class Builder
       targetFile: (file) ->
         if @compile then file.replace /(\.css)?\.less/, '.css' else file      
     }
-    # {
-    #   # SCSS and SASS
-    #   path: [ '**.sass', '**.scss' ]
-    #   compiler: new Scss
-    #   compile: true
-    #   targetFile: (file) ->
-    #     if @compile then file.replace /(\.css)?\.s[ac]ss/, '.css' else file      
-    # }
     {
       # Stylus
       path: '**.styl'
