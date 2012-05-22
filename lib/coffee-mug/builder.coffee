@@ -181,3 +181,5 @@ exports.Builder = class Builder
     @compileConfigTree[version]
   generatePostConfigTree: (version) ->
     @postConfigTree[version] = {} unless @postConfigTree[version]
+  # Link to top level, made accessible inside the object for configuration.
+  generateCompilerConfig: generateCompilerConfig

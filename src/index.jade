@@ -1,0 +1,50 @@
+doctype 5
+html(lang='en')
+  head
+    title coffee-mug page
+    link(href='lib/bootstrap/css/bootstrap.min.css', rel='stylesheet')
+    link(href='css/style.css', rel='stylesheet')
+  body
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container
+          ul.nav
+            li
+              a(href='http://coffee-mug.org')
+                i.icon-book.icon-white
+                |  Documentation
+            li
+              a(href='https://github.com/beefsack/coffee-mug')
+                i.icon-folder-open.icon-white
+                |  GitHub
+    .container
+      .row
+        .span8.offset2
+          .hero-unit
+            h1 coffee-mug
+            p
+              | Code the way you want and let the build system work on it's own.
+              | Be a coder, not a plumber!
+            p
+              button.btn.btn-large.btn-primary(onclick='coffeeAction()') Click for a surprise!
+              button.btn.btn-large(onclick='kaffeineAction()') Click for another surprise!
+      .row
+        .span4
+          h2 Vast array of supported languages
+          p
+            | Just save the file with the file extension corresponding to the
+            | language you want to use and the rest is handled for you.  If you
+            | have custom naming requirements, that's fine!  You can customise
+            | compiling in your build config.
+        .span4
+          h2 Let the system take care of code building
+          p
+            | coffee-mug watches your source code for changes, and only builds
+            | the files that need to change.  The build config is set with sane
+            | defaults, but even if a change is required it tends to be set and
+            | forget.
+        .span4
+          h2 Run tests automatically to keep things reliable
+    script(src='js/script.js')
+    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
+    script(src='lib/bootstrap/js/bootstrap.min.js')
