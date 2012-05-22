@@ -21,7 +21,8 @@
     "jade": "0.26.x",
     "less": "1.3.x",
     "stylus": "0.27.x",
-    "coco": "0.7.x"
+    "coco": "0.7.x",
+    "marked": "0.2.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},

@@ -12,6 +12,7 @@ Haml = require('./compiler/haml').Haml
 Jade = require('./compiler/jade').Jade
 Less = require('./compiler/less').Less
 Stylus = require('./compiler/stylus').Stylus
+Markdown = require('./compiler/markdown').Markdown
 
 exports.Builder = class Builder
   sourcePath: null
@@ -65,6 +66,14 @@ exports.Builder = class Builder
       compile: true
       targetFile: (file) ->
         if @compile then file.replace /(\.html)?\.jade/, '.html' else file
+    }
+    {
+      # Markdown
+      path: '**.md'
+      compiler: new Markdown
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.html)?\.md/, '.html' else file
     }
     # CSS compilers
     {
