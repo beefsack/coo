@@ -6,6 +6,7 @@ walkdir = require 'walkdir'
 _ = require 'underscore'
 util = require 'util'
 # Compilers
+Coco = require('./compiler/coco').Coco
 CoffeeScript = require('./compiler/coffee-script').CoffeeScript
 Haml = require('./compiler/haml').Haml
 Jade = require('./compiler/jade').Jade
@@ -39,6 +40,14 @@ exports.Builder = class Builder
       compile: true
       targetFile: (file) ->
         if @compile then file.replace /(\.js)?\.coffee/, '.js' else file
+    }
+    {
+      # Coco
+      path: '**.co'
+      compiler: new Coco
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.js)?\.co/, '.js' else file
     }
     # HTML compilers
     {
