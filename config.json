@@ -1,9 +1,0 @@
-{
-  "buildPackages": {
-    "package": {
-      "sources": [
-        "."
-      ]
-    }
-  }
-}

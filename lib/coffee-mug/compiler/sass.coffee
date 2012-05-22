@@ -1,0 +1,1 @@
+exports.Sass = class Sass

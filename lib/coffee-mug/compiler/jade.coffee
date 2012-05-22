@@ -1,0 +1,1 @@
+exports.Jade = class Jade

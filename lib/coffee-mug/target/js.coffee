@@ -1,0 +1,1 @@
+exports.Js = class Js

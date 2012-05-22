@@ -13,7 +13,10 @@
     "walkdir": "0.0.x",
     "mkdirp": "0.3.x",
     "jasmine-node": "1.0.x",
-    "hound": "1.0.x"
+    "hound": "1.0.x",
+    "commander": "0.6.x",
+    "xregexp": "1.5.x",
+    "underscore": "1.3.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},
