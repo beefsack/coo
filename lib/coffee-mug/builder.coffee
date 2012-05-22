@@ -10,6 +10,7 @@ Coco = require('./compiler/coco').Coco
 CoffeeScript = require('./compiler/coffee-script').CoffeeScript
 IcedCoffeeScript = require('./compiler/iced-coffee-script').IcedCoffeeScript
 Kaffeine = require('./compiler/kaffeine').Kaffeine
+Move = require('./compiler/move').Move
 Haml = require('./compiler/haml').Haml
 Jade = require('./compiler/jade').Jade
 Less = require('./compiler/less').Less
@@ -67,6 +68,14 @@ exports.Builder = class Builder
       compile: true
       targetFile: (file) ->
         if @compile then file.replace /(\.js)?\.k/, '.js' else file
+    }
+    {
+      # Move
+      path: '**.mv'
+      compiler: new Move
+      compile: true
+      targetFile: (file) ->
+        if @compile then file.replace /(\.js)?\.mv/, '.js' else file
     }
     # HTML compilers
     {
