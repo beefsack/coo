@@ -19,11 +19,6 @@ exports.CoffeeMug = class CoffeeMug
   # Builds the source, from compiling to minification
   build: (version) ->
     @builder().build version
-  # Gets an equivalent js file name for a coffee file name, handling both .coffee
-  # and .js.coffee.
-  getJsName: (file) ->
-    return file.replace /(\.js)?\.coffee$/, '.js' if file.match /\.coffee$/
-    file
   watch: (version) ->
     @build version
     watcher = hound.watch @builder().sourcePath
@@ -38,7 +33,8 @@ exports.CoffeeMug = class CoffeeMug
   server: (version) ->
     # Start a server, then watch
     version = @builder().defaultVersion unless version?
-    file = new nodeStatic.Server path.join(@builder().compilePath, version),
+    @watch version
+    file = new nodeStatic.Server path.join(@builder().outputPath, version),
       cache: false
     require('http').createServer( (request, response) ->
       request.addListener 'end', ->
@@ -50,4 +46,3 @@ exports.CoffeeMug = class CoffeeMug
           else
             console.log "#{request.url} - #{res.message}").listen 8080
     console.log "Server is listening on http://127.0.0.1:8080"
-    @watch version

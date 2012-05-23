@@ -16,6 +16,9 @@ Jade = require('./compiler/jade').Jade
 Less = require('./compiler/less').Less
 Stylus = require('./compiler/stylus').Stylus
 Markdown = require('./compiler/markdown').Markdown
+# Processors
+UglifyJs = require('./processor/uglify-js').UglifyJs
+CleanCss = require('./processor/clean-css').CleanCss
 
 generateCompilerConfig = (compiler, extension, target) ->
   path: "**.#{extension}"
@@ -32,6 +35,7 @@ exports.Builder = class Builder
   defaultVersion: 'development'
   compileConfigTree: {}
   postConfigTree: {}
+  fileConfigTree: {}
   # Versions are created in the output path, the first version is build default
   versions:
     development:
@@ -58,7 +62,24 @@ exports.Builder = class Builder
     generateCompilerConfig new Less, 'less', 'css'
     generateCompilerConfig new Stylus, 'styl', 'css'
   ]
-  postPaths: []
+  postPaths: [
+    {
+      # Mangle and compress JS
+      path: '**.js'
+      process: true
+      processors: [
+        new UglifyJs
+      ]
+    }
+    {
+      # Compress CSS
+      path: '**.css'
+      process: true
+      processors: [
+        new CleanCss
+      ]
+    }
+  ]
   # Load in a config file and run the config's 'config' function for this
   loadConfig: (file) =>
     require(file).config this
@@ -118,7 +139,7 @@ exports.Builder = class Builder
             fs.writeFileSync targetFile, conf.compiler.compile(source)
           else
             console.log "Copying #{f}..."
-            util.pump fs.createReadStream(sourceFile), fs.createWriteStream(targetFile)
+            fs.writeFileSync targetFile, fs.readFileSync(sourceFile)
     # Prune orphaned files
     buildFileNames = []
     for bf in _.keys @files
@@ -133,6 +154,7 @@ exports.Builder = class Builder
     throw "#{version} is not a valid version name" unless @versions[version]?
     builtFiles = []
     compiledFiles = []
+    cvPath = path.join @compilePath, version
     for c, f of @generateCompileConfigTree() when not f.ignore
       compiledFiles.push f.targetFile(c)
     for bf, bfConf of @files
@@ -145,9 +167,10 @@ exports.Builder = class Builder
       for s in sources
         for cf in compiledFiles when (matchedFiles.indexOf cf is -1) and
         @matchPath cf, s
-          cfPath = path.join @compilePath, version, cf
+          cfPath = path.join cvPath, cf
           throw "Cannot find compiled file #{cf}" unless path.existsSync cfPath
           matchedFiles.push cfPath
+          builtFiles.push cf
           if not requiresBuild and (not path.existsSync(bfPath) or
           fs.statSync(cfPath).mtime > fs.statSync(bfPath).mtime)
             requiresBuild = true
@@ -158,28 +181,66 @@ exports.Builder = class Builder
         for mf in matchedFiles
           fs.writeSync(bfFile, fs.readFileSync(mf, 'utf8'), null)
       compiledFiles.push bf
+    # Move files to build dir
+    ovPath = path.join(@outputPath, version)
+    mkdirp.sync ovPath
+    buildFileNames = _.keys @files
+    walkdir.sync cvPath, (f, stat) ->
+      return if stat.isDirectory()
+      f = path.relative(cvPath, f)
+      outf = path.join ovPath, f
+      if builtFiles.indexOf(f) is -1 or buildFileNames.indexOf(f) isnt -1
+        compf = path.join cvPath, f
+        if not path.existsSync(outf) or
+        fs.statSync(outf).mtime < fs.statSync(compf).mtime
+          # Copy
+          console.log "Outputting #{f}..."
+          mkdirp.sync path.dirname(outf)
+          fs.writeFileSync outf, fs.readFileSync(compf)
+      else if path.existsSync(outf)
+        console.log "Removing orphaned file #{f}..."
+        fs.unlinkSync outf
+    # Prune orphaned files
+    walkdir.sync ovPath, (f, stat) ->
+      return if stat.isDirectory()
+      relf = path.relative(ovPath, f)
+      unless path.existsSync(path.join(cvPath, relf))
+        console.log "Removing orphaned file #{f}..."
+        fs.unlinkSync f
   postProcess: (version) ->
     version = @defaultVersion unless version?
     throw "#{version} is not a valid version name" unless @versions[version]?
-  generateCompileConfigTree: (version) ->
-    @compileConfigTree[version] = {} unless @compileConfigTree[version]
+    return if @versions[version].postProcess is false
+    # Run processors
+    ovPath = path.join @outputPath, version
+    for f, c of @generatePostConfigTree(version) when not c.ignore
+      if c.process
+        p = path.join ovPath, f
+        source = fs.readFileSync p, 'utf8'
+        source = processor.process(source) for processor in c.processors
+        fs.writeFileSync p, source
+  generateCompileConfigTree: ->
+    @generateFileConfigTree @sourcePath, @compilePaths
+  generatePostConfigTree: (version) ->
+    @generateFileConfigTree path.join(@outputPath, version), @postPaths
+  generateFileConfigTree: (p, configs) ->
+    cJson = JSON.stringify configs
+    @fileConfigTree[p] = {} unless @fileConfigTree[p]?
+    @fileConfigTree[p][cJson] = {} unless @fileConfigTree[p][cJson]?
     # Prune missing items from the tree
-    for f in _.keys @compileConfigTree[version]
+    for f in _.keys @fileConfigTree[p][cJson]
       abs = path.join @sourcePath, f
-      delete @compileConfigTree[version][f] unless path.existsSync abs
+      delete @fileConfigTree[p][cJson][f] unless path.existsSync abs
     # Add new items to the tree
-    walkdir.sync @sourcePath, (f, stat) =>
+    walkdir.sync p, (f, stat) =>
       # Trim source dir off path
       return if stat.isDirectory()
-      f = f.replace(@sourcePath, '')
-      f = f.substring(1, f.length)
-      return if @compileConfigTree[version][f]?
-      for cp in @compilePaths when @matchPath f, cp.path
-        pathConf = @compileConfigTree[version][f] or {}
-        pathConf = _.defaults cp, pathConf
-        @compileConfigTree[version][f] = pathConf
-    @compileConfigTree[version]
-  generatePostConfigTree: (version) ->
-    @postConfigTree[version] = {} unless @postConfigTree[version]
+      f = path.relative(p, f)
+      return if @fileConfigTree[p][cJson][f]?
+      for c in configs when @matchPath f, c.path
+        pathConf = @fileConfigTree[p][cJson][f] or {}
+        pathConf = _.defaults c, pathConf
+        @fileConfigTree[p][cJson][f] = pathConf
+    @fileConfigTree[p][cJson]  
   # Link to top level, made accessible inside the object for configuration.
   generateCompilerConfig: generateCompilerConfig

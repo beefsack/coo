@@ -26,7 +26,8 @@
     "iced-coffee-script": "1.3.x",
     "kaffeine": "0.1.x",
     "move-panta": "0.4.x",
-    "node-static": "git://github.com/patricklodder/node-static.git"
+    "node-static": "git://github.com/patricklodder/node-static.git",
+    "clean-css": "0.3.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},
