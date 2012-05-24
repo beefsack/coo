@@ -1,5 +1,6 @@
 fs = require 'fs'
 path = require 'path'
+crypto = require 'crypto'
 XRegExp = require('xregexp').XRegExp
 mkdirp = require 'mkdirp'
 walkdir = require 'walkdir'
@@ -33,8 +34,13 @@ generateCompilerConfig = (compiler, extension, target) ->
 
 exports.Builder = class Builder
   sourcePath: null
-  compilePath: null
+  tmpPath: null
   outputPath: null
+  compileDir: 'compiled'
+  srcHashDb: 'src-hash'
+  compileHashDb: 'compile-hash'
+  buildFileHashDb: 'build-file-hash'
+  copyFileHashDb: 'copy-file-hash'
   defaultVersion: 'development'
   compileConfigTree: {}
   postConfigTree: {}
@@ -118,7 +124,7 @@ exports.Builder = class Builder
   # Build the source tree
   setRootPath: (p) ->
     @sourcePath = path.join p, 'src'
-    @compilePath = path.join p, 'tmp/compiled'
+    @tmpPath = path.join p, 'tmp'
     @outputPath = path.join p, 'build'
   build: (version) ->
     version = @defaultVersion unless version?
@@ -131,13 +137,14 @@ exports.Builder = class Builder
     throw "#{version} is not a valid version name" unless @versions[version]?
     # Create new files when required
     targets = []
+    srcHashes = @loadDatabase version, @srcHashDb
     for f, conf of @generateCompileConfigTree(version)
       sourceFile = path.join @sourcePath, f
-      targetFile = path.join @compilePath, version, conf.targetFile(f)
+      targetFile = path.join @getCompilePath(version), conf.targetFile(f)
       targets.push targetFile unless conf.ignore is true
       unless conf.ignore
-        if not path.existsSync(targetFile) or fs.statSync(targetFile).mtime <
-        fs.statSync(sourceFile).mtime
+        srcHash = @getFileHash sourceFile
+        unless path.existsSync(targetFile) and srcHashes[sourceFile] is srcHash
           mkdirp.sync path.dirname(targetFile)
           if conf.compile
             console.log "Compiling #{f}..."
@@ -146,11 +153,13 @@ exports.Builder = class Builder
           else
             console.log "Copying #{f}..."
             fs.writeFileSync targetFile, fs.readFileSync(sourceFile)
+          srcHashes[sourceFile] = srcHash
+          @saveDatabase version, @srcHashDb, srcHashes
     # Prune orphaned files
     buildFileNames = []
     for bf in _.keys @files
-      buildFileNames.push path.join(@compilePath, version, bf)
-    walkdir.sync path.join(@compilePath, version), (f, stat) ->
+      buildFileNames.push path.join(@getCompilePath(version), bf)
+    walkdir.sync @getCompilePath(version), (f, stat) ->
       return if stat.isDirectory()
       if targets.indexOf(f) is -1 and buildFileNames.indexOf(f) is -1
         console.log "Removing orphaned file #{f}..."
@@ -160,15 +169,17 @@ exports.Builder = class Builder
     throw "#{version} is not a valid version name" unless @versions[version]?
     builtFiles = []
     compiledFiles = []
-    cvPath = path.join @compilePath, version
+    cvPath = @getCompilePath version
+    buildFileHashes = @loadDatabase version, @buildFileHashDb
     for c, f of @generateCompileConfigTree() when not f.ignore
       compiledFiles.push f.targetFile(c)
     for bf, bfConf of @files
       # Check if we need update, searching sources one by one to get correct
       # dependency order
-      bfPath = path.join @compilePath, version, bf
+      bfPath = path.join cvPath, bf
       sources = [bfConf.source] unless _.isArray bfConf.source
       matchedFiles = []
+      matchedFileHashes = []
       requiresBuild = false
       for s in sources
         for cf in compiledFiles when (matchedFiles.indexOf cf is -1) and
@@ -176,33 +187,44 @@ exports.Builder = class Builder
           cfPath = path.join cvPath, cf
           throw "Cannot find compiled file #{cf}" unless path.existsSync cfPath
           matchedFiles.push cfPath
+          matchedFileHashes.push @getFileHash(cfPath)
           builtFiles.push cf
-          if not requiresBuild and (not path.existsSync(bfPath) or
-          fs.statSync(cfPath).mtime > fs.statSync(bfPath).mtime)
-            requiresBuild = true
-      if requiresBuild
-        console.log "Building #{bf}..."
-        mkdirp.sync path.dirname(bfPath)
-        bfFile = fs.openSync bfPath, 'w'
-        for mf in matchedFiles
-          fs.writeSync(bfFile, fs.readFileSync(mf, 'utf8'), null)
+      buildFileExists = path.existsSync bfPath
+      if buildFileExists and matchedFiles.length is 0
+        console.log "Removing #{bf}..."
+        fs.unlinkSync bfPath
+      else if matchedFiles.length > 0
+        newMatchedFilesHash = @getHash matchedFileHashes.join()
+        unless path.existsSync(bfPath) and
+        buildFileHashes[bfPath] is newMatchedFilesHash
+          console.log "Building #{bf}..."
+          mkdirp.sync path.dirname(bfPath)
+          bfFile = fs.openSync bfPath, 'w'
+          for mf in matchedFiles
+            fs.writeSync(bfFile, fs.readFileSync(mf, 'utf8'), null)
+          buildFileHashes[bfPath] = newMatchedFilesHash
+          @saveDatabase version, @buildFileHashDb, buildFileHashes
       compiledFiles.push bf
     # Move files to build dir
+    copyFileHashes = @loadDatabase version, @copyFileHashDb
     ovPath = path.join(@outputPath, version)
     mkdirp.sync ovPath
     buildFileNames = _.keys @files
-    walkdir.sync cvPath, (f, stat) ->
+    walkdir.sync cvPath, (f, stat) =>
       return if stat.isDirectory()
       f = path.relative(cvPath, f)
       outf = path.join ovPath, f
       if builtFiles.indexOf(f) is -1 or buildFileNames.indexOf(f) isnt -1
         compf = path.join cvPath, f
-        if not path.existsSync(outf) or
-        fs.statSync(outf).mtime < fs.statSync(compf).mtime
+        compfHash = @getFileHash compf
+        unless path.existsSync(outf) and
+        copyFileHashes[compf] is compfHash
           # Copy
           console.log "Outputting #{f}..."
           mkdirp.sync path.dirname(outf)
           fs.writeFileSync outf, fs.readFileSync(compf)
+          copyFileHashes[compf] = compfHash
+          @saveDatabase version, @copyFileHashDb, copyFileHashes          
       else if path.existsSync(outf)
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync outf
@@ -247,6 +269,21 @@ exports.Builder = class Builder
         pathConf = @fileConfigTree[p][cJson][f] or {}
         pathConf = _.defaults c, pathConf
         @fileConfigTree[p][cJson][f] = pathConf
-    @fileConfigTree[p][cJson]  
+    @fileConfigTree[p][cJson]
+  getHash: (data) ->
+    hash = crypto.createHash 'sha1'
+    hash.update data
+    hash.digest 'base64'
+  getFileHash: (file) -> @getHash fs.readFileSync(file, 'utf8')
+  getCompilePath: (version) -> path.join @tmpPath, version, @compileDir
+  getDatabaseFileName: (version, name) ->
+    "#{path.join(@tmpPath, version, name)}.json"
+  loadDatabase: (version, name) ->
+    file = @getDatabaseFileName version, name
+    return {} unless path.existsSync file
+    JSON.parse fs.readFileSync(file, 'utf8')
+  saveDatabase: (version, name, data) ->
+    file = @getDatabaseFileName version, name
+    fs.writeFileSync file, JSON.stringify(data)
   # Link to top level, made accessible inside the object for configuration.
   generateCompilerConfig: generateCompilerConfig
