@@ -13,6 +13,7 @@ IcedCoffeeScript = require('./compiler/iced-coffee-script').IcedCoffeeScript
 Kaffeine = require('./compiler/kaffeine').Kaffeine
 Move = require('./compiler/move').Move
 Sibilant = require('./compiler/sibilant').Sibilant
+Roy = require('./compiler/roy').Roy
 Haml = require('./compiler/haml').Haml
 Jade = require('./compiler/jade').Jade
 Markdown = require('./compiler/markdown').Markdown
@@ -58,6 +59,7 @@ exports.Builder = class Builder
     generateCompilerConfig new Kaffeine, 'k', 'js'
     generateCompilerConfig new Move, 'mv', 'js'
     generateCompilerConfig new Sibilant, 'sibilant', 'js'
+    generateCompilerConfig new Roy, 'roy', 'js'
     # HTML compilers
     generateCompilerConfig new Haml, 'haml', 'html'
     generateCompilerConfig new Jade, 'jade', 'html'

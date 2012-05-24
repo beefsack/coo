@@ -29,7 +29,8 @@
     "node-static": "git://github.com/patricklodder/node-static.git",
     "clean-css": "0.3.x",
     "contracts.coffee": "0.3.x",
-    "sibilant": "git://github.com/jbr/sibilant.git"
+    "sibilant": "git://github.com/jbr/sibilant.git",
+    "roy": "0.1.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},
