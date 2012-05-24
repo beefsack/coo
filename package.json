@@ -27,7 +27,8 @@
     "kaffeine": "0.1.x",
     "move-panta": "0.4.x",
     "node-static": "git://github.com/patricklodder/node-static.git",
-    "clean-css": "0.3.x"
+    "clean-css": "0.3.x",
+    "contracts.coffee": "0.3.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},
