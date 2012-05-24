@@ -39,10 +39,8 @@ exports.Coo = class Coo
     require('http').createServer( (request, response) ->
       request.addListener 'end', ->
         file.serve request, response, (err, res) ->
-          if err?
+          if err? and not request.url.match /favicon\.ico/
             console.error "Error serving #{request.url} - #{err.message}"
             response.writeHead err.status, err.headers
-            response.end()
-          else
-            console.log "#{request.url} - #{res.message}").listen 8080
+            response.end()).listen 8080
     console.log "Server is listening on http://127.0.0.1:8080"
