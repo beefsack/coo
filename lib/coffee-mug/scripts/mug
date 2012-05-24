@@ -1,4 +1,0 @@
-cli = new (require('../cli').Cli)
-
-# Pass off to the cli object to handle
-cli.action process.argv, process.cwd()

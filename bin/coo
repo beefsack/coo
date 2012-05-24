@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+require('coffee-script');
+Cli = new (require('../lib/coo/cli').Cli);
+Cli.action(process.argv, process.cwd());

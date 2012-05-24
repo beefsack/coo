@@ -1,8 +1,9 @@
-coffee-mug - CoffeeScript and JavaScript project framework
-==========================================================
+Coo - Static web builder, with a vast range of supported languages
+==================================================================
 
-coffee-mug is a CoffeeScript and JavaScript project framework, that automates
-testing and building of your project.  coffee-mug can watch for changes in your
-source and will rebuild and run tests on the fly.
+Coo is a customisable and flexible web content builder that aims to stay out of
+your way.  The major goal is to support as many languages as possible without
+any configuration, and a simple build config with sane defaults to concatenate
+your scripts and compress for production.
 
-For usage instructions, see the [coffee-mug homepage](http://coffee-mug.org).
+For usage instructions, see the [Coo homepage](http://beefsack.github.com/coo).

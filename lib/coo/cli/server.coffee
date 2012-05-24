@@ -1,11 +1,11 @@
 Cli = require '../cli'
-CoffeeMug = require('../coffee-mug').CoffeeMug
+Coo = require('../coo').Coo
 
 exports.Server = class Server
   command: 'server [version]'
   description: 'run a web server while watching the source for updates'
   action: (version, cmdr) ->
-    (new CoffeeMug).server version
+    (new Coo).server version
   register: (cmdr) ->
     cmd = cmdr.command @command
     cmd.description @description

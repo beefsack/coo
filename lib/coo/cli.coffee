@@ -4,7 +4,6 @@ Watch = require('./cli/watch').Watch
 Server = require('./cli/server').Server
 
 exports.Cli = class Cli
-  coffeeMug: null
   commands:
     build: new Build
     watch: new Watch

@@ -1,14 +1,13 @@
 {
-  "name": "coffee-mug",
+  "name": "coo",
   "version": "0.0.1",
-  "homepage": "http://coffee-mug.org",
+  "homepage": "http://beefsack.github.com/coo",
   "repository": {
     "type": "git",
-    "url": "git@github.com:beefsack/coffee-mug.git"
+    "url": "git@github.com:beefsack/coo.git"
   },
   "dependencies": {
     "coffee-script": "1.3.x",
-    "jake": "0.2.x",
     "uglify-js": "1.2.x",
     "walkdir": "0.0.x",
     "mkdirp": "0.3.x",
@@ -17,6 +16,7 @@
     "commander": "0.6.x",
     "xregexp": "1.5.x",
     "underscore": "1.3.x",
+    "underscore.string": "2.1.x",
     "haml": "0.4.x",
     "jade": "0.26.x",
     "less": "1.3.x",
@@ -28,7 +28,8 @@
     "move-panta": "0.4.x",
     "node-static": "git://github.com/patricklodder/node-static.git",
     "clean-css": "0.3.x",
-    "contracts.coffee": "0.3.x"
+    "contracts.coffee": "0.3.x",
+    "sibilant": "git://github.com/jbr/sibilant.git"
   },
   "devDependencies": {},
   "optionalDependencies": {},
@@ -36,5 +37,8 @@
     "node": "*"
   },
   "author": "Michael Alexander <mail@michaelalexander.com.au> (http://michaelalexander.com.au)",
-  "description": "JavaScript and CoffeeScript project framework"
+  "description": "Static web builder, with a vast range of supported languages",
+  "license": "MIT",
+  "main": "./lib/coo/coo",
+  "bin": "./bin/coo"
 }

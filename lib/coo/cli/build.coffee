@@ -1,11 +1,11 @@
 Cli = require '../cli'
-CoffeeMug = require('../coffee-mug').CoffeeMug
+Coo = require('../coo').Coo
 
 exports.Build = class Build
   command: 'build [version]'
   description: 'compile and build packages'
   action: (version, cmdr) ->
-    (new CoffeeMug).build version
+    (new Coo).build version
   register: (cmdr) ->
     cmd = cmdr.command @command
     cmd.description @description

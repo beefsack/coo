@@ -1,2 +1,0 @@
-exports.Css = class Css
-  

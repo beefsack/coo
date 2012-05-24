@@ -7,4 +7,4 @@ exports.Stylus = class Stylus
       stylus.render source, {}, (err, css) =>
         throw err if err?
         output = css
-    return output
+    output

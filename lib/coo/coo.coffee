@@ -4,8 +4,8 @@ Builder = require('./builder').Builder
 hound = require 'hound'
 nodeStatic = require 'node-static'
 
-# The CoffeeMug object contains the base functionality of coffee-mug
-exports.CoffeeMug = class CoffeeMug
+# The Coo class contains the base functionality of Coo
+exports.Coo = class Coo
   dir: process.cwd()
   builderInstance: null
   watchBuffer: null

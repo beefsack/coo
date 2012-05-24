@@ -12,11 +12,12 @@ Contracts = require('./compiler/contracts').Contracts
 IcedCoffeeScript = require('./compiler/iced-coffee-script').IcedCoffeeScript
 Kaffeine = require('./compiler/kaffeine').Kaffeine
 Move = require('./compiler/move').Move
+Sibilant = require('./compiler/sibilant').Sibilant
 Haml = require('./compiler/haml').Haml
 Jade = require('./compiler/jade').Jade
+Markdown = require('./compiler/markdown').Markdown
 Less = require('./compiler/less').Less
 Stylus = require('./compiler/stylus').Stylus
-Markdown = require('./compiler/markdown').Markdown
 # Processors
 UglifyJs = require('./processor/uglify-js').UglifyJs
 CleanCss = require('./processor/clean-css').CleanCss
@@ -56,6 +57,7 @@ exports.Builder = class Builder
     generateCompilerConfig new Coco, 'co', 'js'
     generateCompilerConfig new Kaffeine, 'k', 'js'
     generateCompilerConfig new Move, 'mv', 'js'
+    generateCompilerConfig new Sibilant, 'sibilant', 'js'
     # HTML compilers
     generateCompilerConfig new Haml, 'haml', 'html'
     generateCompilerConfig new Jade, 'jade', 'html'
