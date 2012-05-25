@@ -3,6 +3,7 @@ html(lang='en')
   head
     title coo page
     link(href='lib/bootstrap/css/bootstrap.min.css', rel='stylesheet')
+    link(href='lib/google-code-prettify/prettify.css', rel='stylesheet')
     link(href='css/style.css', rel='stylesheet')
   body
     .navbar.navbar-fixed-top
@@ -45,6 +46,32 @@ html(lang='en')
             | forget.
         .span4
           h2 Run tests automatically to keep things reliable
-    script(src='js/script.js')
+      .row
+        h1
+          | Supported languages
+          small  for JavaScript, CSS and HTML compilation
+      .row
+        h2 JavaScript
+      .row
+        .span4
+          h3 CoffeeScript
+          p CoffeeScript is a popular language inspired by Ruby, Python and Haskell.  Compiles automatically with a <code>.coffee</code> extension.
+          pre.prettyprint.linenums
+            | sayHello = (name) -&gt;
+            |   alert "Hello, \#{name}"
+            | sayHello 'CoffeeScript'
+          button.btn(onclick='sayHello.coffeeScript()') Run code now
+        .span4
+          h3 Sibilant
+          p Sibilant is inspired by lisp and follows many lisp conventions.  Compiles automatically with a <code>.sibilant</code> extension.
+          pre.prettyprint.linenums
+            | (defun sayHello (name)
+            |   (alert name))
+            | (sayHello 'Sibilant')
+          button.btn(onclick='sayHello.sibilant()') Run code now
+        .span4
+          h3 CoffeeScript
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
     script(src='lib/bootstrap/js/bootstrap.min.js')
+    script(src='lib/google-code-prettify/prettify.js')
+    script(src='js/script.js')

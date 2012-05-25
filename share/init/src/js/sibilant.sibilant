@@ -1,0 +1,13 @@
+(scoped
+  (chain
+    ($ document)
+    (ready (lambda ()
+      (prettyPrint))))
+
+  (when (undefined? window.sayHello)
+    (setf window.sayHello {}))
+  (defun window.sayHello.sibilant () (
+    (thunk
+      (defun sayHello (name)
+        (alert (concat "Hello, " name)))
+      (sayHello "Sibilant")))))

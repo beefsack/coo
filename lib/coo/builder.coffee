@@ -149,7 +149,13 @@ exports.Builder = class Builder
           if conf.compile
             console.log "Compiling #{f}..."
             source = fs.readFileSync sourceFile, 'utf8'
-            fs.writeFileSync targetFile, conf.compiler.compile(source)
+            try
+              compiled = conf.compiler.compile(source)
+            catch e
+              console.log "Error while compiling #{f}:"
+              console.log e.toString()
+              continue
+            fs.writeFileSync targetFile, compiled
           else
             console.log "Copying #{f}..."
             fs.writeFileSync targetFile, fs.readFileSync(sourceFile)
@@ -245,7 +251,12 @@ exports.Builder = class Builder
       if c.process
         p = path.join ovPath, f
         source = fs.readFileSync p, 'utf8'
-        source = processor.process(source) for processor in c.processors
+        try
+          source = processor.process(source) for processor in c.processors
+        catch e
+          console.log "Error while processing #{f}:"
+          console.log e.toString()          
+          continue
         fs.writeFileSync p, source
   generateCompileConfigTree: ->
     @generateFileConfigTree @sourcePath, @compilePaths
