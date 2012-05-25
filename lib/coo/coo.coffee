@@ -3,6 +3,7 @@ path = require 'path'
 Builder = require('./builder').Builder
 hound = require 'hound'
 nodeStatic = require 'node-static'
+ncp = require('ncp').ncp
 
 # The Coo class contains the base functionality of Coo
 exports.Coo = class Coo
@@ -44,3 +45,8 @@ exports.Coo = class Coo
             response.writeHead err.status, err.headers
             response.end()).listen 8080
     console.log "Server is listening on http://127.0.0.1:8080"
+  init: (location) ->
+    location = process.cwd() unless location?
+    ncp path.join(__dirname, '../../share/init'), location, (err) ->
+      throw err if err?
+      console.log "Initialised coo project at #{location}"

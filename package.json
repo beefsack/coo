@@ -30,7 +30,8 @@
     "clean-css": "0.3.x",
     "contracts.coffee": "0.3.x",
     "sibilant": "git://github.com/jbr/sibilant.git",
-    "roy": "0.1.x"
+    "roy": "0.1.x",
+    "ncp": "0.2.x"
   },
   "devDependencies": {},
   "optionalDependencies": {},
