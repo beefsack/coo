@@ -5,12 +5,30 @@ hound = require 'hound'
 nodeStatic = require 'node-static'
 ncp = require('ncp').ncp
 jasmine = require 'jasmine-node'
+# Languages for tests
+require 'coco'
+require 'contracts.coffee'
+require 'iced-coffee-script'
+require 'kaffeine'
+require 'move-panta'
+require 'roy'
+require 'sibilant'
 
 # The Coo class contains the base functionality of Coo
 exports.Coo = class Coo
   dir: process.cwd()
   builderInstance: null
   watchBuffer: null
+  testExtensions: [
+    'js'
+    'coffee'
+    'iced'
+    'co'
+    'k'
+    'mv'
+    'roy'
+    'sibilant'
+  ]
   builder: ->
     unless @builderInstance?
       @builderInstance = new Builder
@@ -44,8 +62,8 @@ exports.Coo = class Coo
           if err? and not request.url.match /favicon\.ico/
             console.error "Error serving #{request.url} - #{err.message}"
             response.writeHead err.status, err.headers
-            response.end()).listen 8080
-    console.log "Server is listening on http://127.0.0.1:8080"
+            response.end()).listen 16440
+    console.log "Server is listening on http://127.0.0.1:16440"
   init: (location) ->
     location = process.cwd() unless location?
     ncp path.join(__dirname, '../../share/init'), location, (err) ->
@@ -55,4 +73,4 @@ exports.Coo = class Coo
     directory = path.join process.cwd(), 'test' unless directory?
     jasmine.executeSpecsInFolder directory, ->
       console.log '' # Force new line
-    , false, true, false, false, /spec\.(js|coffee)$/i
+    , false, true, false, false, new RegExp("spec\\.(#{@testExtensions.join('|')})$", 'i')

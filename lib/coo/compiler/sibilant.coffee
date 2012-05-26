@@ -1,4 +1,4 @@
-sibilant = require('sibilant')
+sibilant = require 'sibilant'
 _s = require 'underscore.string'
 
 exports.Sibilant = class Sibilant
