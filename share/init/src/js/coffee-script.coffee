@@ -1,5 +1,8 @@
-window.coffeeAction = ->
+root = if window? then window else exports
+
+root.coffeeAction = ->
   alert 'This code was written in CoffeeScript.'
 
-window.sayHello.coffee = (name) ->
-  alert "Hello, #{name}"
+root.sayHello = {} unless root.sayHello?
+root.sayHello.coffee = (name) ->
+  "Hello, #{name}"

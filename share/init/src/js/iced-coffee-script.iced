@@ -1,2 +1,2 @@
 window.sayHello.iced = (name) ->
-  alert "Hello, #{name}"
+  "Hello, #{name}"

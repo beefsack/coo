@@ -4,6 +4,6 @@
   }
 
   window.sayHello.kaffeine = function(n = 'Kaffeine') {
-    alert("Hello, #{n}")
+    return "Hello, #{n}";
   }
 }).call(this);

@@ -58,10 +58,9 @@ html(lang='en')
             a(href='http://coffeescript.org/') CoffeeScript
             |  is a popular language inspired by Ruby, Python and Haskell.  Compiles automatically with the <code>.coffee</code> extension.
           pre.prettyprint
-            | sayHello = (name) -&gt;
-            |   alert "Hello, \#{name}"
-            | sayHello 'CoffeeScript'
-          button.btn(onclick='sayHello.coffee("CoffeeScript")') Run code now
+            | sayHello = (name) -&gt; "Hello, \#{name}"
+            | alert sayHello('CoffeeScript')
+          button.btn(onclick='alert(sayHello.coffee("CoffeeScript"))') Run code now
         .span4
           h3 Sibilant
           p
@@ -69,9 +68,9 @@ html(lang='en')
             |  is inspired by Lisp and follows many Lisp conventions.  Compiles automatically with the <code>.sibilant</code> extension.
           pre.prettyprint
             | (defun sayHello (name)
-            |   (alert (concat "Hello, " name)))
-            | (sayHello "Sibilant")
-          button.btn(onclick='sayHello.sibilant("Sibilant")') Run code now
+            |   (concat "Hello, " name))
+            | (alert (sayHello "Sibilant"))
+          button.btn(onclick='alert(sayHello.sibilant("Sibilant"))') Run code now
         .span4
           h3 Roy
           p
@@ -79,9 +78,9 @@ html(lang='en')
             |  tries to meld some features common in static functional languages.  Compiles automatically with the <code>.roy</code> extension.
           pre.prettyprint
             | let sayHello name: String =
-            |   alert "Hello, " ++ name
-            | sayHello "Roy"
-          button.btn(onclick='sayHello.roy("Roy")') Run code now
+            |   "Hello, " ++ name
+            | alert (sayHello "Roy")
+          button.btn(onclick='alert(sayHello.roy("Roy"))') Run code now
       .row.compiler
         .span4
           h3 IcedCoffeeScript
@@ -89,20 +88,18 @@ html(lang='en')
             a(href='http://maxtaco.github.com/coffee-script/') IcedCoffeeScript
             |  is a superset of CoffeeScript which simplifies asyncronous code.  Compiles automatically with the <code>.iced</code> extension.
           pre.prettyprint
-            | sayHello = (name) -&gt;
-            |   alert "Hello, \#{name}"
-            | sayHello 'IcedCoffeeScript'
-          button.btn(onclick='sayHello.iced("IcedCoffeeScript")') Run code now
+            | sayHello = (name) -&gt; "Hello, \#{name}"
+            | alert sayHello('IcedCoffeeScript')
+          button.btn(onclick='alert(sayHello.iced("IcedCoffeeScript"))') Run code now
         .span4
           h3 Coco
           p
             a(href='https://github.com/satyr/coco/') Coco
             |  is a CoffeeScript dialect that aims to be more radical and practical.  Compiles automatically with the <code>.co</code> extension.
           pre.prettyprint
-            | sayHello = ->
-            |   alert "Hello, \#{it}"
+            | sayHello = -&gt; "Hello, \#{it}"
             | sayHello 'Coco'
-          button.btn(onclick='sayHello.coco("Coco")') Run code now
+          button.btn(onclick='alert(sayHello.coco("Coco"))') Run code now
         .span4
           h3 Move
           p
@@ -110,10 +107,10 @@ html(lang='en')
             |  is aimed towards people not previously familiar with programming.  Compiles automatically with the <code>.mv</code> extension.
           pre.prettyprint
             | sayHello = ^(name){
-            |   alert "Hello, "+name
+            |   "Hello, "+name
             | }
-            | sayHello "Move"
-          button.btn(onclick='sayHello.move("Move")') Run code now
+            | alert sayHello("Move")
+          button.btn(onclick='alert(sayHello.move("Move"))') Run code now
       .row.compiler
         .span4
           h3
@@ -125,10 +122,9 @@ html(lang='en')
           pre.prettyprint
             | sayHello :: (Str) -> Str
             | sayHello = (name) ->
-            |   alert "Hello, \#{name}"
             |   "Hello, \#{name}"
-            | sayHello "contracts.coffee"
-          button.btn(onclick='sayHello.contracts("contracts.coffee")', disabled=true) Run code now
+            | alert sayHello("contracts.coffee")
+          button.btn(onclick='alert(sayHello.contracts("contracts.coffee"))', disabled=true) Run code now
         .span4
           h3 Kaffeine
           p
@@ -136,10 +132,10 @@ html(lang='en')
             |  is a set of optional extensions to the JavaScript syntax.  Compiles automatically with the <code>.k</code> extension.
           pre.prettyprint
             | sayHello = function(n = 'Kaffeine') {
-            |   alert("Hello, \#{n}")
+            |   return "Hello, \#{n}"
             | }
-            | sayHello()
-          button.btn(onclick='sayHello.kaffeine()') Run code now
+            | alert(sayHello())
+          button.btn(onclick='alert(sayHello.kaffeine())') Run code now
       h2 CSS
       .row.compiler
         .span4
@@ -192,6 +188,47 @@ html(lang='en')
             | ===============
             | 
             | This is some text.
+      .page-header
+        h1
+          | Write tests
+          small  in any supported language
+      .row
+        .span8.offset2
+          p Just like the rest of the project, you can write tests in your choice of language too.  Below are a few examples of tests in various languages.
+      .row
+        .span4
+          h3 JavaScript
+          p
+            | JavaScript tests end in
+            code  .spec.js
+          pre.prettyprint
+            | describe('A thing', function() {
+            |   it('should be true', function() {
+            |     expect(false).toBe(true);
+            |   });
+            | });
+        .span4
+          h3 CoffeeScript
+          p
+            a(href='http://coffeescript.org/') CoffeeScript
+            |  tests end in
+            code  .spec.coffee
+          pre.prettyprint
+            | describe 'A thing', ->
+            |   it 'should be true', ->
+            |     expect(false).toBe true
+        .span4
+          h3 Sibilant
+          p
+            a(href='http://sibilantjs.info/') Sibilant
+            |  tests end in
+            code  .spec.sibilant
+          pre.prettyprint
+            | (describe "A thing" (lambda ()
+            |   (it "should be true" (lambda ()
+            |     (chain 
+            |       (expect false)
+            |       (toBe true))))))
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
     script(src='lib/google-code-prettify/prettify.js')
     script(src='lib/bootstrap/js/bootstrap.min.js')
