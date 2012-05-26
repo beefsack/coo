@@ -2,8 +2,8 @@ doctype 5
 html(lang='en')
   head
     title coo page
-    link(href='lib/bootstrap/css/bootstrap.min.css', rel='stylesheet')
     link(href='lib/google-code-prettify/prettify.css', rel='stylesheet')
+    link(href='lib/bootstrap/css/bootstrap.min.css', rel='stylesheet')
     link(href='css/style.css', rel='stylesheet')
   body
     .navbar.navbar-fixed-top
@@ -46,32 +46,155 @@ html(lang='en')
             | forget.
         .span4
           h2 Run tests automatically to keep things reliable
-      .row
+      .page-header
         h1
           | Supported languages
           small  for JavaScript, CSS and HTML compilation
-      .row
-        h2 JavaScript
-      .row
+      h2 JavaScript
+      .row.compiler
         .span4
           h3 CoffeeScript
-          p CoffeeScript is a popular language inspired by Ruby, Python and Haskell.  Compiles automatically with a <code>.coffee</code> extension.
-          pre.prettyprint.linenums
+          p
+            a(href='http://coffeescript.org/') CoffeeScript
+            |  is a popular language inspired by Ruby, Python and Haskell.  Compiles automatically with the <code>.coffee</code> extension.
+          pre.prettyprint
             | sayHello = (name) -&gt;
             |   alert "Hello, \#{name}"
             | sayHello 'CoffeeScript'
-          button.btn(onclick='sayHello.coffeeScript()') Run code now
+          button.btn(onclick='sayHello.coffee("CoffeeScript")') Run code now
         .span4
           h3 Sibilant
-          p Sibilant is inspired by lisp and follows many lisp conventions.  Compiles automatically with a <code>.sibilant</code> extension.
-          pre.prettyprint.linenums
+          p
+            a(href='http://sibilantjs.info/') Sibilant
+            |  is inspired by Lisp and follows many Lisp conventions.  Compiles automatically with the <code>.sibilant</code> extension.
+          pre.prettyprint
             | (defun sayHello (name)
-            |   (alert name))
-            | (sayHello 'Sibilant')
-          button.btn(onclick='sayHello.sibilant()') Run code now
+            |   (alert (concat "Hello, " name)))
+            | (sayHello "Sibilant")
+          button.btn(onclick='sayHello.sibilant("Sibilant")') Run code now
         .span4
-          h3 CoffeeScript
+          h3 Roy
+          p
+            a(href='http://roy.brianmckenna.org/') Roy
+            |  tries to meld some features common in static functional languages.  Compiles automatically with the <code>.roy</code> extension.
+          pre.prettyprint
+            | let sayHello name: String =
+            |   alert "Hello, " ++ name
+            | sayHello "Roy"
+          button.btn(onclick='sayHello.roy("Roy")') Run code now
+      .row.compiler
+        .span4
+          h3 IcedCoffeeScript
+          p
+            a(href='http://maxtaco.github.com/coffee-script/') IcedCoffeeScript
+            |  is a superset of CoffeeScript which simplifies asyncronous code.  Compiles automatically with the <code>.iced</code> extension.
+          pre.prettyprint
+            | sayHello = (name) -&gt;
+            |   alert "Hello, \#{name}"
+            | sayHello 'IcedCoffeeScript'
+          button.btn(onclick='sayHello.iced("IcedCoffeeScript")') Run code now
+        .span4
+          h3 Coco
+          p
+            a(href='https://github.com/satyr/coco/') Coco
+            |  is a CoffeeScript dialect that aims to be more radical and practical.  Compiles automatically with the <code>.co</code> extension.
+          pre.prettyprint
+            | sayHello = ->
+            |   alert "Hello, \#{it}"
+            | sayHello 'Coco'
+          button.btn(onclick='sayHello.coco("Coco")') Run code now
+        .span4
+          h3 Move
+          p
+            a(href='http://movelang.org/') Move
+            |  is aimed towards people not previously familiar with programming.  Compiles automatically with the <code>.mv</code> extension.
+          pre.prettyprint
+            | sayHello = ^(name){
+            |   alert "Hello, "+name
+            | }
+            | sayHello "Move"
+          button.btn(onclick='sayHello.move("Move")') Run code now
+      .row.compiler
+        .span4
+          h3
+            | Contracts.coffee
+            small  (not on Chrome)
+          p
+            a(href='http://disnetdev.com/contracts.coffee/') Contracts.coffee
+            |  is a dialect of CoffeeScript with built-in support for contracts.  Compiles automatically with the <code>.contracts</code> extension.
+          pre.prettyprint
+            | sayHello :: (Str) -> Str
+            | sayHello = (name) ->
+            |   alert "Hello, \#{name}"
+            |   "Hello, \#{name}"
+            | sayHello "contracts.coffee"
+          button.btn(onclick='sayHello.contracts("contracts.coffee")', disabled=true) Run code now
+        .span4
+          h3 Kaffeine
+          p
+            a(href='http://weepy.github.com/kaffeine/') Kaffeine
+            |  is a set of optional extensions to the JavaScript syntax.  Compiles automatically with the <code>.k</code> extension.
+          pre.prettyprint
+            | sayHello = function(n = 'Kaffeine') {
+            |   alert("Hello, \#{n}")
+            | }
+            | sayHello()
+          button.btn(onclick='sayHello.kaffeine()') Run code now
+      h2 CSS
+      .row.compiler
+        .span4
+          h3 Less
+          p
+            a(href="http://lesscss.org/") Less
+            |  extends CSS with variables, mixins, operations and functions.  Compiles automatically with the <code>.less</code> extension.
+          pre.prettyprint
+            | body {
+            |   h1 {
+            |     color: @color;
+            |   }
+            | }
+        .span4
+          h3 Stylus
+          p
+            a(href="http://learnboost.github.com/stylus/") Stylus
+            |  provides an efficient, dynamic, and expressive way to generate CSS.  Compiles automatically with the <code>.styl</code> extension.
+          pre.prettyprint
+            | body
+            |   h1
+            |     color @color
+      h2 HTML
+      .row.compiler
+        .span4
+          h3 Haml
+          p
+            a(href="http://haml.info/") Haml
+            |  is based on one primary principle. Markup should be beautiful.  Compiles automatically with the <code>.haml</code> extension.
+          pre.prettyprint
+            | %html
+            |   %body
+            |     %p Paragraph text
+        .span4
+          h3 Jade
+          p
+            a(href="http://jade-lang.com/") Jade
+            |  is a high performance template engine heavily influenced by Haml.  Compiles automatically with the <code>.jade</code> extension.
+          pre.prettyprint
+            | html
+            |   body
+            |     p Paragraph text
+        .span4
+          h3 Markdown
+          p
+            a(href="http://daringfireball.net/projects/markdown/") Markdown
+            |  is a text-to-HTML conversion tool for web writers.  Compiles automatically with the <code>.md</code> extension.
+          pre.prettyprint
+            | This is a title
+            | ===============
+            | 
+            | This is some text.
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
-    script(src='lib/bootstrap/js/bootstrap.min.js')
     script(src='lib/google-code-prettify/prettify.js')
+    script(src='lib/bootstrap/js/bootstrap.min.js')
+    script(src='lib/move-0.4.5.js')
+    script(src='lib/coo.js')
     script(src='js/script.js')

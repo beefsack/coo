@@ -1,0 +1,3 @@
+window.sayHello.move = ^(name){
+  alert "Hello, "+name
+}

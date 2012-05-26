@@ -6,6 +6,7 @@ mkdirp = require 'mkdirp'
 walkdir = require 'walkdir'
 _ = require 'underscore'
 util = require 'util'
+growl = require 'growl'
 # Compilers
 Coco = require('./compiler/coco').Coco
 CoffeeScript = require('./compiler/coffee-script').CoffeeScript
@@ -152,8 +153,12 @@ exports.Builder = class Builder
             try
               compiled = conf.compiler.compile(source)
             catch e
-              console.log "Error while compiling #{f}:"
-              console.log e.toString()
+              title = "Error while compiling #{f}"
+              errorMesage = "#{title}\n#{e.toString()}"
+              console.log errorMesage
+              growl e.toString(),
+                title: title
+                name: 'coo'
               continue
             fs.writeFileSync targetFile, compiled
           else

@@ -1,0 +1,3 @@
+let sayHello name: String =
+  alert "Hello, " ++ name
+bindSayHello "roy" sayHello

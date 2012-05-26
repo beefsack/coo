@@ -1,0 +1,4 @@
+window.sayHello.contracts :: (Str) -> Str
+window.sayHello.contracts = (name) ->
+  alert "Hello, #{name}"
+  "Hello, #{name}"
