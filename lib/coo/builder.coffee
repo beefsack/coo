@@ -172,6 +172,7 @@ exports.Builder = class Builder
       buildFileNames.push path.join(@getCompilePath(version), bf)
     walkdir.sync @getCompilePath(version), (f, stat) ->
       return if stat.isDirectory()
+      f = path.normalize(f)
       if targets.indexOf(f) is -1 and buildFileNames.indexOf(f) is -1
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync f
