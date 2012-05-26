@@ -3,13 +3,15 @@ Build = require('./cli/build').Build
 Watch = require('./cli/watch').Watch
 Server = require('./cli/server').Server
 Init = require('./cli/init').Init
+Test = require('./cli/test').Test
 
 exports.Cli = class Cli
   commands:
-    build: new Build
-    watch: new Watch
     server: new Server
+    watch: new Watch
+    build: new Build
     init: new Init
+    test: new Test
   factory: (command) ->
     unless @commands[command]?
       throw 'Invalid command, use --help to see a list of commands'

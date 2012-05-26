@@ -4,6 +4,7 @@ Builder = require('./builder').Builder
 hound = require 'hound'
 nodeStatic = require 'node-static'
 ncp = require('ncp').ncp
+jasmine = require 'jasmine-node'
 
 # The Coo class contains the base functionality of Coo
 exports.Coo = class Coo
@@ -50,3 +51,8 @@ exports.Coo = class Coo
     ncp path.join(__dirname, '../../share/init'), location, (err) ->
       throw err if err?
       console.log "Initialised coo project at #{location}"
+  test: (directory) ->
+    directory = path.join process.cwd(), 'test' unless directory?
+    jasmine.executeSpecsInFolder directory, ->
+      console.log '' # Force new line
+    , false, true, false, false, /spec\.(js|coffee)$/i
