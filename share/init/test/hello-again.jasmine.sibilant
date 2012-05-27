@@ -1,0 +1,6 @@
+(defvar cs (require "../src/js/coffee-script"))
+(describe "A hello sayer" (lambda ()
+  (it "should say hello" (lambda ()
+    (chain
+      (expect (cs.sayHello.coffee "Guy"))
+      (toMatch (regex "^hello" "i")))))))
