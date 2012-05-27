@@ -3,7 +3,8 @@ path = require 'path'
 Builder = require('./builder').Builder
 hound = require 'hound'
 nodeStatic = require 'node-static'
-ncp = require('ncp').ncp
+wrench = require 'wrench'
+util = require 'util' # Required by wrench
 jasmine = require 'jasmine-node'
 # Languages for tests
 require 'coco'
@@ -66,9 +67,8 @@ exports.Coo = class Coo
     console.log "Server is listening on http://127.0.0.1:16440"
   init: (location) ->
     location = process.cwd() unless location?
-    ncp path.join(__dirname, '../../share/init'), location, (err) ->
-      throw err if err?
-      console.log "Initialised coo project at #{location}"
+    wrench.copyDirSyncRecursive path.join(__dirname, '../../share/init'), location
+    console.log "Initialised coo project at #{location}"
   test: (directory) ->
     directory = path.join process.cwd(), 'test' unless directory?
     jasmine.executeSpecsInFolder directory, ->

@@ -2,10 +2,9 @@ fs = require 'fs'
 path = require 'path'
 crypto = require 'crypto'
 XRegExp = require('xregexp').XRegExp
-mkdirp = require 'mkdirp'
-walkdir = require 'walkdir'
 _ = require 'underscore'
-util = require 'util'
+wrench = require 'wrench'
+util = require 'util' # Required by wrench
 growl = require 'growl'
 # Compilers
 Coco = require('./compiler/coco').Coco
@@ -139,14 +138,15 @@ exports.Builder = class Builder
     # Create new files when required
     targets = []
     srcHashes = @loadDatabase version, @srcHashDb
+    compilePath = @getCompilePath version
     for f, conf of @generateCompileConfigTree(version)
       sourceFile = path.join @sourcePath, f
-      targetFile = path.join @getCompilePath(version), conf.targetFile(f)
+      targetFile = path.join compilePath, conf.targetFile(f)
       targets.push targetFile unless conf.ignore is true
       unless conf.ignore
         srcHash = @getFileHash sourceFile
         unless path.existsSync(targetFile) and srcHashes[sourceFile] is srcHash
-          mkdirp.sync path.dirname(targetFile)
+          wrench.mkdirSyncRecursive path.dirname(targetFile)
           if conf.compile
             console.log "Compiling #{f}..."
             source = fs.readFileSync sourceFile, 'utf8'
@@ -169,10 +169,11 @@ exports.Builder = class Builder
     # Prune orphaned files
     buildFileNames = []
     for bf in _.keys @files
-      buildFileNames.push path.join(@getCompilePath(version), bf)
-    walkdir.sync @getCompilePath(version), (f, stat) ->
-      return if stat.isDirectory()
-      f = path.normalize f
+      buildFileNames.push path.join(compilePath, bf)
+    for f in wrench.readdirSyncRecursive compilePath
+      f = path.join compilePath, f
+      stat = fs.statSync f
+      continue if stat.isDirectory()
       if targets.indexOf(f) is -1 and buildFileNames.indexOf(f) is -1
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync f
@@ -210,7 +211,7 @@ exports.Builder = class Builder
         unless path.existsSync(bfPath) and
         buildFileHashes[bfPath] is newMatchedFilesHash
           console.log "Building #{bf}..."
-          mkdirp.sync path.dirname(bfPath)
+          wrench.mkdirSyncRecursive path.dirname(bfPath)
           bfFile = fs.openSync bfPath, 'w'
           for mf in matchedFiles
             fs.writeSync(bfFile, fs.readFileSync(mf, 'utf8'), null)
@@ -220,10 +221,12 @@ exports.Builder = class Builder
     # Move files to build dir
     copyFileHashes = @loadDatabase version, @copyFileHashDb
     ovPath = path.join(@outputPath, version)
-    mkdirp.sync ovPath
+    wrench.mkdirSyncRecursive ovPath
     buildFileNames = _.keys @files
-    walkdir.sync cvPath, (f, stat) =>
-      return if stat.isDirectory()
+    for f in wrench.readdirSyncRecursive cvPath
+      f = path.join cvPath, f
+      stat = fs.statSync f
+      continue if stat.isDirectory()
       f = path.relative(cvPath, f)
       outf = path.join ovPath, f
       if builtFiles.indexOf(f) is -1 or buildFileNames.indexOf(f) isnt -1
@@ -233,7 +236,7 @@ exports.Builder = class Builder
         copyFileHashes[compf] is compfHash
           # Copy
           console.log "Outputting #{f}..."
-          mkdirp.sync path.dirname(outf)
+          wrench.mkdirSyncRecursive path.dirname(outf)
           fs.writeFileSync outf, fs.readFileSync(compf)
           copyFileHashes[compf] = compfHash
           @saveDatabase version, @copyFileHashDb, copyFileHashes          
@@ -241,8 +244,10 @@ exports.Builder = class Builder
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync outf
     # Prune orphaned files
-    walkdir.sync ovPath, (f, stat) ->
-      return if stat.isDirectory()
+    for f in wrench.readdirSyncRecursive ovPath
+      f = path.join ovPath, f
+      stat = fs.statSync f
+      continue if stat.isDirectory()
       relf = path.relative(ovPath, f)
       unless path.existsSync(path.join(cvPath, relf))
         console.log "Removing orphaned file #{f}..."
@@ -277,11 +282,13 @@ exports.Builder = class Builder
       abs = path.join @sourcePath, f
       delete @fileConfigTree[p][cJson][f] unless path.existsSync abs
     # Add new items to the tree
-    walkdir.sync p, (f, stat) =>
+    for f in wrench.readdirSyncRecursive p
+      f = path.join p, f
+      stat = fs.statSync f
       # Trim source dir off path
-      return if stat.isDirectory()
+      continue if stat.isDirectory()
       f = path.relative(p, f)
-      return if @fileConfigTree[p][cJson][f]?
+      continue if @fileConfigTree[p][cJson][f]?
       for c in configs when @matchPath f, c.path
         pathConf = @fileConfigTree[p][cJson][f] or {}
         pathConf = _.defaults c, pathConf
