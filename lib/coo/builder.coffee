@@ -139,6 +139,7 @@ exports.Builder = class Builder
     targets = []
     srcHashes = @loadDatabase version, @srcHashDb
     compilePath = @getCompilePath version
+    wrench.mkdirSyncRecursive compilePath
     for f, conf of @generateCompileConfigTree(version)
       sourceFile = path.join @sourcePath, f
       targetFile = path.join compilePath, conf.targetFile(f)
@@ -257,7 +258,7 @@ exports.Builder = class Builder
     throw "#{version} is not a valid version name" unless @versions[version]?
     return if @versions[version].postProcess is false
     # Run processors
-    ovPath = path.join @outputPath, version
+    ovPath = @getOutputPath version
     for f, c of @generatePostConfigTree(version) when not c.ignore
       if c.process
         p = path.join ovPath, f
@@ -272,7 +273,7 @@ exports.Builder = class Builder
   generateCompileConfigTree: ->
     @generateFileConfigTree @sourcePath, @compilePaths
   generatePostConfigTree: (version) ->
-    @generateFileConfigTree path.join(@outputPath, version), @postPaths
+    @generateFileConfigTree @getOutputPath(version), @postPaths
   generateFileConfigTree: (p, configs) ->
     cJson = JSON.stringify configs
     @fileConfigTree[p] = {} unless @fileConfigTree[p]?
@@ -300,6 +301,7 @@ exports.Builder = class Builder
     hash.digest 'base64'
   getFileHash: (file) -> @getHash fs.readFileSync(file, 'utf8')
   getCompilePath: (version) -> path.join @tmpPath, version, @compileDir
+  getOutputPath: (version) -> path.join @outputPath, version
   getDatabaseFileName: (version, name) ->
     "#{path.join(@tmpPath, version, name)}.json"
   loadDatabase: (version, name) ->
