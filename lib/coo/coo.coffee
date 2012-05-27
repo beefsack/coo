@@ -5,7 +5,6 @@ hound = require 'hound'
 nodeStatic = require 'node-static'
 wrench = require 'wrench'
 util = require 'util' # Required by wrench
-jasmine = require 'jasmine-node'
 # Languages for tests
 require 'coco'
 require 'contracts.coffee'
@@ -14,21 +13,16 @@ require 'kaffeine'
 require 'move-panta'
 require 'roy'
 require 'sibilant'
+# Testers
+Jasmine = require('./tester/jasmine').Jasmine
 
 # The Coo class contains the base functionality of Coo
 exports.Coo = class Coo
   dir: process.cwd()
   builderInstance: null
   watchBuffer: null
-  testExtensions: [
-    'js'
-    'coffee'
-    'iced'
-    'co'
-    'k'
-    'mv'
-    'roy'
-    'sibilant'
+  testers: [
+    new Jasmine
   ]
   builder: ->
     unless @builderInstance?
@@ -71,6 +65,5 @@ exports.Coo = class Coo
     console.log "Initialised coo project at #{location}"
   test: (directory) ->
     directory = path.join process.cwd(), 'test' unless directory?
-    jasmine.executeSpecsInFolder directory, ->
-      console.log '' # Force new line
-    , false, true, false, false, new RegExp("spec\\.(#{@testExtensions.join('|')})$", 'i')
+    for tester in @testers
+      tester.run directory if tester.testsExist directory
