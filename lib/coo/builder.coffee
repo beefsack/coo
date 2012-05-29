@@ -29,9 +29,8 @@ generateCompilerConfig = (compiler, extension, target) ->
   compiler: compiler
   compile: true
   targetFile: (file) ->
-    repRegex = new RegExp "(.#{target})?\\.#{extension}$"
-    if @compile then file.replace repRegex, ".#{target}" else file            
-
+    repRegex = new RegExp "(\\.#{target})?\\.#{extension}$"
+    if @compile then file.replace repRegex, ".#{target}" else file
 exports.Builder = class Builder
   sourcePath: null
   tmpPath: null
