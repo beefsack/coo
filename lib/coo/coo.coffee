@@ -11,7 +11,6 @@ require 'contracts.coffee'
 require 'iced-coffee-script'
 require 'kaffeine'
 require 'move-panta'
-require 'roy'
 require 'sibilant'
 # Testers
 Jasmine = require('./tester/jasmine').Jasmine
