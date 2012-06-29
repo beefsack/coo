@@ -27,7 +27,7 @@ describe 'A builder', ->
     outputPath = builder.getOutputPath 'development'
     nonSourceFile = 'js/something.notsource'
     # Check it exists
-    expect(path.existsSync(path.join(outputPath, nonSourceFile))).toBe true
+    expect(fs.existsSync(path.join(outputPath, nonSourceFile))).toBe true
     # Check contents are the same
     expect(builder.getFileHash(path.join(outputPath, nonSourceFile))).
       toBe builder.getFileHash(path.join(sourcePath, nonSourceFile))

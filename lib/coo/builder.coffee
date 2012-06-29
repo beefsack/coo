@@ -141,7 +141,7 @@ exports.Builder = class Builder
       targets.push targetFile unless conf.ignore is true
       unless conf.ignore
         srcHash = @getFileHash sourceFile
-        unless path.existsSync(targetFile) and srcHashes[sourceFile] is srcHash
+        unless fs.existsSync(targetFile) and srcHashes[sourceFile] is srcHash
           wrench.mkdirSyncRecursive path.dirname(targetFile)
           if conf.compile
             console.log "Compiling #{f}..."
@@ -194,17 +194,17 @@ exports.Builder = class Builder
         for cf in compiledFiles when (matchedFiles.indexOf cf is -1) and
         @matchPath cf, s
           cfPath = path.join cvPath, cf
-          throw "Cannot find compiled file #{cf}" unless path.existsSync cfPath
+          throw "Cannot find compiled file #{cf}" unless fs.existsSync cfPath
           matchedFiles.push cfPath
           matchedFileHashes.push @getFileHash(cfPath)
           builtFiles.push cf
-      buildFileExists = path.existsSync bfPath
+      buildFileExists = fs.existsSync bfPath
       if buildFileExists and matchedFiles.length is 0
         console.log "Removing #{bf}..."
         fs.unlinkSync bfPath
       else if matchedFiles.length > 0
         newMatchedFilesHash = @getHash matchedFileHashes.join()
-        unless path.existsSync(bfPath) and
+        unless fs.existsSync(bfPath) and
         buildFileHashes[bfPath] is newMatchedFilesHash
           console.log "Building #{bf}..."
           wrench.mkdirSyncRecursive path.dirname(bfPath)
@@ -228,7 +228,7 @@ exports.Builder = class Builder
       if builtFiles.indexOf(f) is -1 or buildFileNames.indexOf(f) isnt -1
         compf = path.join cvPath, f
         compfHash = @getFileHash compf
-        unless path.existsSync(outf) and
+        unless fs.existsSync(outf) and
         copyFileHashes[compf] is compfHash
           # Copy
           console.log "Outputting #{f}..."
@@ -236,7 +236,7 @@ exports.Builder = class Builder
           fs.writeFileSync outf, fs.readFileSync(compf)
           copyFileHashes[compf] = compfHash
           @saveDatabase version, @copyFileHashDb, copyFileHashes          
-      else if path.existsSync(outf)
+      else if fs.existsSync(outf)
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync outf
     # Prune orphaned files
@@ -245,7 +245,7 @@ exports.Builder = class Builder
       stat = fs.statSync f
       continue if stat.isDirectory()
       relf = path.relative(ovPath, f)
-      unless path.existsSync(path.join(cvPath, relf))
+      unless fs.existsSync(path.join(cvPath, relf))
         console.log "Removing orphaned file #{f}..."
         fs.unlinkSync f
   postProcess: (version) ->
@@ -276,7 +276,7 @@ exports.Builder = class Builder
     # Prune missing items from the tree
     for f in _.keys @fileConfigTree[p][cJson]
       abs = path.join @sourcePath, f
-      delete @fileConfigTree[p][cJson][f] unless path.existsSync abs
+      delete @fileConfigTree[p][cJson][f] unless fs.existsSync abs
     # Add new items to the tree
     for f in wrench.readdirSyncRecursive p
       f = path.join p, f
@@ -301,7 +301,7 @@ exports.Builder = class Builder
     "#{path.join(@tmpPath, version, name)}.json"
   loadDatabase: (version, name) ->
     file = @getDatabaseFileName version, name
-    return {} unless path.existsSync file
+    return {} unless fs.existsSync file
     JSON.parse fs.readFileSync(file, 'utf8')
   saveDatabase: (version, name, data) ->
     file = @getDatabaseFileName version, name

@@ -33,7 +33,7 @@
   "devDependencies": {},
   "optionalDependencies": {},
   "engines": {
-    "node": "*"
+    "node": ">=0.7.1"
   },
   "author": "Michael Alexander <mail@michaelalexander.com.au> (http://michaelalexander.com.au)",
   "description": "Static web builder, with a vast range of supported languages",

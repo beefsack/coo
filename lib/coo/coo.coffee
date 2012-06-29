@@ -27,7 +27,7 @@ exports.Coo = class Coo
       @builderInstance = new Builder
       configPath = path.join @dir, 'config.js'
       @builderInstance.setRootPath @dir
-      @builderInstance.loadConfig configPath if path.existsSync configPath
+      @builderInstance.loadConfig configPath if fs.existsSync configPath
     @builderInstance
   # Builds the source, from compiling to minification
   build: (version) ->
