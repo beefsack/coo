@@ -7,7 +7,6 @@ wrench = require 'wrench'
 util = require 'util' # Required by wrench
 # Languages for tests
 require 'coco'
-require 'contracts.coffee'
 require 'iced-coffee-script'
 require 'kaffeine'
 require 'move-panta'

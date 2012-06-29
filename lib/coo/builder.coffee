@@ -9,7 +9,6 @@ growl = require 'growl'
 # Compilers
 Coco = require('./compiler/coco').Coco
 CoffeeScript = require('./compiler/coffee-script').CoffeeScript
-Contracts = require('./compiler/contracts').Contracts
 IcedCoffeeScript = require('./compiler/iced-coffee-script').IcedCoffeeScript
 Kaffeine = require('./compiler/kaffeine').Kaffeine
 Move = require('./compiler/move').Move
@@ -57,7 +56,6 @@ exports.Builder = class Builder
     }
     # JS compilers
     generateCompilerConfig new CoffeeScript, 'coffee', 'js'
-    generateCompilerConfig new Contracts, 'contracts', 'js'
     generateCompilerConfig new IcedCoffeeScript, 'iced', 'js'
     generateCompilerConfig new Coco, 'co', 'js'
     generateCompilerConfig new Kaffeine, 'k', 'js'
