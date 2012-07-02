@@ -186,7 +186,8 @@ exports.Builder = class Builder
       # Check if we need update, searching sources one by one to get correct
       # dependency order
       bfPath = path.join cvPath, bf
-      sources = [bfConf.source] unless _.isArray bfConf.source
+      sources = bfConf.source
+      sources = [sources] unless _.isArray sources
       matchedFiles = []
       matchedFileHashes = []
       requiresBuild = false
@@ -209,6 +210,7 @@ exports.Builder = class Builder
           console.log "Building #{bf}..."
           wrench.mkdirSyncRecursive path.dirname(bfPath)
           bfFile = fs.openSync bfPath, 'w'
+          # console.log matchedFiles
           for mf in matchedFiles
             fs.writeSync(bfFile, fs.readFileSync(mf, 'utf8'), null)
           buildFileHashes[bfPath] = newMatchedFilesHash
